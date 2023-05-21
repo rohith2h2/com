@@ -1,5 +1,5 @@
 # Table of contents
 
 * [😇 Welcome :)](README.md)
-* [Page 1](page-1.md)
+* [Introduction to verilog:](introduction-to-verilog.md)
 * [Page 2](page-2.md)
