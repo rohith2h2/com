@@ -39,3 +39,4 @@ endmodule
 ```
 
 here we have implemented D flip flop in verilog, we have used 4 signals, two are inputs and rest are outputs. q, q\_bar are mentioned as reg because there is a procedural block where q and q\_bar is used. and assignment require left side to be reg type. We have used non-blocking assignment here as it is sequential logic. non blocking assignment means all the operation on the right side of assignments is performed first and assigning the values is performed last.(ex a <= b, c <= a ; here b is executed and next a is executed and b value is given to a and old value of a is given to c.&#x20;
+
