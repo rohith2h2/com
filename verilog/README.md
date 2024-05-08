@@ -2,4 +2,4 @@
 
 Overview
 
-There is a roadmap to follow, here we are going to learn about digital design using verilog and we will be moving toward verification using systemverilog. Everyday I will be updating this gitbook with the learning from that day. Date is not specified, But the order we will follow is Digital design -> verilog mastery -> systemverilog -> opensource projects.
+Welcome to my Gitbook! Here, I've gathered all the RTL design problems and interview questions I tackled while prepping for my interviews. I've explained each problem in a way that's easy to understand. Plus, you can also check out my portfolio and the projects I've worked on during my Master's. Let's dive in and learn together!
