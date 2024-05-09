@@ -4,7 +4,7 @@ I came across this question from this website **rajesh52.blogspot.com**
 
 Design a module that finds the faster clock between two different clocks. The output A\_faster\_than\_B asserts "1" when fA > fB and asserts "0" when fB > fA along with valid.
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 Followup questions:
 
