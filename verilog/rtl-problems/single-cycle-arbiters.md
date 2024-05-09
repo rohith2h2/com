@@ -4,7 +4,7 @@ we will be learning about arbiters. What are arbiters? arbiter is digital circui
 
 Now we will be seeing questions on arbiters:
 
-\--> Single Cycle Arbiter:
+\-> Single Cycle Arbiter:
 
 ```
 You are leading a complex SoC which interacts with a lot of peripherals. As a result there is a need for an arbitration scheme to be used across the SoC. You decide to design a parameterized fixed priority arbitration scheme which grants a winner every cycle.
