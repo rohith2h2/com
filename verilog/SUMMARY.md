@@ -1,7 +1,7 @@
 # Table of contents
 
-* [😇 Welcome : )](README.md)
-* [GOALS!!!](goals.md)
+* [😇 Welcome](README.md)
+* [To prep](to-prep.md)
 * [About Me](about-me.md)
 
 ## RTL Problems

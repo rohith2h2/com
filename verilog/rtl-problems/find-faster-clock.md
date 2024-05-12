@@ -16,3 +16,5 @@ Followup questions:
 
 Ideas :&#x20;
 
+Approach 1: Build a new clock which is faster than both clk\_A and clk\_B
+
