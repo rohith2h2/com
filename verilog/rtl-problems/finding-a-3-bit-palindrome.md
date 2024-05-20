@@ -6,7 +6,7 @@ So, the idea here is we need to know a number is palindrome or not, we need to c
 
 for this we implement a shift register, which shifts the lsb bit to left and assign new x\_i bit to lsb. and a counter to count upto 2 to start checking palindrome\_o.
 
-its a simple problem,
+Its a simple problem,
 
 ```
 assign next_count = count_q[1] ? count_q : count_q + 2'b01;

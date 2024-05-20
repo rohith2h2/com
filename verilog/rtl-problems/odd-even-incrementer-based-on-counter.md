@@ -49,7 +49,7 @@ end
 ```
 {% endcode %}
 
-Complete code
+Complete code:
 
 {% code lineNumbers="true" %}
 ```verilog
@@ -88,10 +88,4 @@ endmodule
 {% endcode %}
 
 complete code with testbench : [https://www.edaplayground.com/x/bpaq](https://www.edaplayground.com/x/bpaq)
-
-
-
-
-
-
 
