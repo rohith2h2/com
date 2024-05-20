@@ -1,7 +1,7 @@
 # Table of contents
 
 * [😇 Welcome](README.md)
-* [To prep](to-prep.md)
+* [To prep](goals.md)
 * [About Me](about-me.md)
 
 ## RTL Problems
@@ -11,3 +11,5 @@
 * [Divide by 3 Module](rtl-problems/divide-by-3-module.md)
 * [Finding a 3 bit palindrome](rtl-problems/finding-a-3-bit-palindrome.md)
 * [Single Cycle Arbiters](rtl-problems/single-cycle-arbiters.md)
+* [Edge Capture](rtl-problems/edge-capture.md)
+* [Odd Even incrementer based on counter](rtl-problems/odd-even-incrementer-based-on-counter.md)

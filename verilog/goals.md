@@ -1,4 +1,4 @@
-# GOALS!!!
+# To prep
 
 Hey there, fellow newbie in the world of semiconductor job hunting! I'm on the lookout for opportunities in the industry, specializing in RTL design and coding problem-solving. Here's the plan: we're going to dive deep into each RTL problem, dedicating a page to explore the concepts behind the solutions. This approach will help us grasp the designs more clearly and uncover various methods to tackle new questions.
 
