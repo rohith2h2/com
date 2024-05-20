@@ -6,18 +6,65 @@ Implement a edge detector circuit which captures any neg edge( transitioning fro
 
 
 
-Example: input is 0xAB
+Consider the following scenario:
 
-which is 1010\_1011
+* **Cycle 1:** Input is `0xAB` (binary 1010\_1011). Output should be `0000_0000` (no previous input to compare against).
+*   **Cycle 2:** Input is `0xCA` (binary 1100\_1010). Comparing to the previous input:
 
-then output would be 0000\_0000
+    * `1010_1011` (previous)
+    * `1100_1010` (current)
 
-in next cycle let input be 0xCA
+    The output should be `0010_0001` (representing edges on bits 21 and 25).
 
-which is 1100\_1010, now checking previous input and current bit by bit to detect 1->0 transition
+**Design Approach**
 
-1010\_1011
+1. **Store Previous Input:** We'll use a register (`data_q`) to store the value of the input signal from the previous clock cycle.
+2. **Bitwise Comparison:** On each clock cycle, we'll compare the current input (`data_i`) with the stored previous input (`data_q`). We'll use bitwise AND (`&`) with the inverted current input (`~data_i`) to isolate the positions where a 1-to-0 transition occurred.
+3. **Sticky Capture:** The detected edges will be ORed (`|`) with a register (`edge_q`) that holds any previously captured edges. This ensures the edges remain sticky until reset.
 
-1100\_1010
 
-output would be 0010\_0001, 21. And these are sticky edge detector, meaning the output would change in next cycle unless reset is applied.&#x20;
+
+
+
+idea: so we will be taking to instances of data value from current cycle and previous cycle, and check whether there's a transition from 1 to 0, and or it with edge\_q which is all the previous edge detections.
+
+{% code lineNumbers="true" %}
+```verilog
+assign edge_seen[31:0] = (~data_i[31:0] & data_q[31:0] ) | edge_q[31:0];
+assign edge_o[31:0] = edge_seen[31:0];
+```
+{% endcode %}
+
+this code snippet which is comb\_block calculates the edge seen detection.
+
+
+
+complete code:\
+
+
+{% code lineNumbers="true" %}
+```verilog
+module edge_capture( input logic clk, input logic reset, input logic[31:0] data_i,
+    output logic[31:0] edge_o);
+    
+    logic [31:0] edge_q;
+    logic [31:0] data_q;
+    logic [31:0] edge_seen;
+    
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) begin
+            data_q[31:0] <= 32'h0;
+            edge_q[31:0] <= 32'h0;
+        end else begin
+            data_q[31:0] <= data_i[31:0];
+            edge_q[31:0] <= edge_seen[31:0];
+        end
+    end
+    
+    //comb logic 
+    assign edge_seen[31:0] = (~data_i[31:0] & data_q[31:0]) | edge_q[31:0];
+    assign edge_o[31:0] = edge_seen[31:0];
+    
+endmodule
+```
+{% endcode %}
