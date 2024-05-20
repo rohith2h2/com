@@ -58,6 +58,7 @@ always_ff @(posedge clk_A or posedge reset) begin
         if(cycle_counter < PERIOD) begin
             cycle_counter <= cycle_counter + 1'b1;
         end else begin
+            valid <= 1;
             if(count_a > count_b + threshold)
                 A_faster_than_B <= 1;
             else if(count_b > count_a + threshold)
