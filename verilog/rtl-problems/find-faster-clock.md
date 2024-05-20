@@ -112,10 +112,10 @@ module fasterclock(
             valid <= 0;
             A_faster_than_B <= 0;
         end else begin
-            valid <= 1;
             if(cycle_counter < period) begin
                 cycle_counter <= cycle_counter + 1;
             end else begin
+                valid <= 1;
                 if(count_a > count_b + threshold)
                     A_faster_than_B <= 1;
                 else if (count_b > count_a + threshold) 
