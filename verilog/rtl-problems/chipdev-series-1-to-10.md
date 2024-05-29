@@ -193,3 +193,403 @@ this problem explores a lot about bit shifting.
 
 
 
+4\) Gray code counter&#x20;
+
+Build a circuit that generates a Gray code sequence starting from `0` on the output (`dout`). Gray code is an ordering of binary numbers such that two successive values only have one bit difference between them. For example, a Gray code sequence for a two bit value could be: `b00 b01 b11 b10` The Gray code sequence should use the standard encoding. In the standard encoding the least significant bit follows a repetitive pattern of 2 on, 2 off ( `... 11001100 ...` ); the next digit a pattern of 4 on, 4 off ( `... 1111000011110000 ...` ); the nth least significant bit a pattern of 2n on 2n off. When the reset-low signal (`resetn`) goes to `0`, the Gray code sequence should restart from `0`.
+
+Input and Output Signals
+
+* `clk` - Clock signal
+* `resetn` - Synchronous reset-low signal
+* `out` - Gray code counter value
+
+Output signals during reset
+
+* `out` - `0` when `resetn` is active
+
+Here we will be calculating the grey code using xor current bit and next bit, and storing it in a temp variable and last bit of q is assigned to last bit of temp
+
+{% code lineNumbers="true" %}
+```verilog
+//gray code calculation
+for( int i=0; i<DATA_WIDTH-1; i++) begin
+    temp_next[i] = q_next[i+1] ^ q_next[i];
+end
+    temp_next[DATA_WIDTH-1:0] = q_next[DATA_WIDTH-1:0];
+    
+```
+{% endcode %}
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module model #(parameter
+  DATA_WIDTH = 4
+) (
+  input clk,
+  input resetn,
+  output logic [DATA_WIDTH-1:0] out
+);
+
+  logic [DATA_WIDTH-1:0] q, q_next;
+  logic [DATA_WIDTH-1:0] temp, temp_next;
+  
+  always_ff @(posedge clk or posedge reset) begin
+    if(reset) begin
+      temp <= 0;
+      q <= 0;
+    end else begin
+      q <= q_next;
+      temp <= temp_next;
+    end
+  end
+  
+  always_comb begin
+    q_next = q + 1;
+    for(int i=0; i<DATA_WIDTH-1; i++) begin
+      temp_next[i] = q_next[i] ^ q_next[i+1];
+    end
+    temp_next[DATA_WIDTH-1] = q_next[DATA_WIDTH-1];
+  end
+  
+  assign out = temp;
+  
+  endmodule
+      
+```
+{% endcode %}
+
+Here design might not need of seperate comb and ff blocks, just ff could work, but for design clarity and learning to write seperate comb and ff logics we did it. so, in ff block we are giving the q\_next and temp\_next calculated inside the comb block.&#x20;
+
+
+
+5\) Reversing Bits
+
+Reverse the bits of an input value's binary representation.
+
+Input and Output Signals
+
+* `din` - Input value
+* `dout` - Bitwise reversed value
+
+
+
+Idea: we can decalre a temp variable and assign the bit from msb to lsb in temp
+
+```verilog
+for(int i=0; i<DATA_WIDTH; i++) 
+    temp[i] = din[DATA_WIDTH-1 - i];
+    
+```
+
+this line will copy elements from MSB of din into the LSB into temp, which indeed is reversing the bit.
+
+complete code:
+
+{% code lineNumbers="true" %}
+```verilog
+module reversed (parameter N=32) (
+    logic [N-1:0] din,
+    logic [N-1:0] dout);
+    
+    logic [N-1:0] temp;
+    
+    always_comb begin
+        for(int i=0; i< N; i++) begin
+            temp[i] = din[N-1 - i];
+        end
+    end
+    assign dout = temp;
+endmodule
+```
+{% endcode %}
+
+
+
+6\) Edge Detector
+
+Build a circuit that pulses `dout` one cycle after the rising edge of `din`. A pulse is defined as writing a single-cycle `1` as shown in the examples below. When `resetn` is asserted, the value of `din` should be treated as `0`. Bonus - can you enhance your design to pulse `dout` on the same cycle as the rising edge? Note that this enhancement will not pass our test suite, but is still a useful exercise.
+
+Input and Output Signals
+
+* `clk` - Clock signal
+* `resetn` - Synchronous reset-low signal
+* `din` - Input signal
+* `dout` - Output signal
+
+Output signals during reset
+
+* `dout` - `0` when `resetn` is active
+
+
+
+Idea :&#x20;
+
+
+
+7\) PISO Shift register:
+
+Build a circuit that takes the multi-bit input (`din`) and shifts the input value’s least significant bit (rightmost bit) to the single-bit output (`dout`) one bit at a time. The circuit should begin shifting the input’s least significant bit when the the input enable signal (`din_en`) goes high. In other words, the input enable signal going high indicates that this circuit should start shifting the current input signal from it’s least significant bit, regardless of which bits the circuit has already shifted. If all the input’s bits have been shifted to the output so that there are no more bits to shift, the output must output `0`. When reset (`resetn`) is active, the input value that is being shifted is treated as `0`. Even when reset goes back to being inactive, the input value will still be treated as `0`, unless the input enable signal makes the circuit begin shifting from the input again.
+
+Input and Output Signals
+
+* `clk` - Clock signal
+* `resetn` - Synchronous reset-low signal
+* `din` - Input signal
+* `din_en` - Enable signal for input data
+* `dout` - Output signal
+
+Output signals during reset
+
+* `dout` - `0` when `resetn` is active
+
+
+
+Idea : Here we need to give the din to temp variable, and this is done when din\_en is high, indicating the  we need to start shifting, when din\_en goes low, so once the din\_en goes high, even if din value changes, it wont affect our current output, until din\_en again goes high, reseting temp to new din value. If din\_en doesnt go low, we keep on giving the same number without any shifting in input.
+
+
+
+For this we take to logic -> temp, next\_temp. temp hold din, next\_temp hold shifting of din. next\_temp is calculated in comb\_logic
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+//PISO
+module PISO #(parameter N= 16) (
+    input logic clk,
+    input logic reset,
+    input logic [N-1:0] din,
+    input logic din_en,
+    output logic [N-1:0] dout);
+    
+    logic [N-1:0] temp;
+    logic [N-1:0] next_temp;
+    
+    always_ff @(posedge clk or posedge reset) begin
+    if(reset) begin
+    temp <= 0;
+    end else if(din_en) begin
+        temp <= din;
+    end else begin
+        temp <= next_temp;
+        end
+    end
+    
+    always_comb begin
+        next_temp = temp >> 1;
+        dout = temp[0];
+    end
+    endmodule
+```
+{% endcode %}
+
+This should do the task.
+
+
+
+8\) SIPO, now we need to design a circuit, which takes serial input and gives out parallel output,&#x20;
+
+
+
+idea : so we need to have a register which takes the din serially and every cycle, it left shifts to place incoming bits at lsb by adding din to temp
+
+temp <= (temp << 1) + din;
+
+{% code lineNumbers="true" %}
+```verilog
+module sipo #(parameter n = 16) (
+    input logic clk,
+    input logic reset,
+    input logic din,
+    output logic [n-1:0] dout );
+    
+    logic [n-1:0] temp;
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) begin
+            temp<= 0;
+        end else begin
+            temp <= (temp<<1) + din;
+        end
+    end
+    assign dout = temp;
+    endmodule
+        
+```
+{% endcode %}
+
+
+
+9\) Fibonacci Generator:&#x20;
+
+Design a circuit which generates the Fibonacci sequence starting with `1` and `1` as the first two numbers. The Fibonacci sequence is a sequence of numbers where each number is the sum of the two previous numbers. More formally this can be expressed as: `F0 = 1` `F1 = 1` `Fn = Fn-1 + Fn-2` for `n > 1`. Following the definition of the Fibonacci sequence above we can see that the sequence is `1, 1, 2, 3, 5, 8, 13, etc`. The sequence should be produced when the active low signal (`resetn`) becomes active. In other words, the sequence should restart from `1` followed by another `1` (the Fibonacci sequence's initial condition) as soon as `resetn` becomes active.
+
+Input and Output Signals
+
+* `clk` - Clock signal
+* `resetn` - Synchronous reset-low signal
+* `out` - Current Fibonacci number
+
+Output signals during reset
+
+* `out` - `1` when `resetn` is active (the first `1` of the Fibonacci sequence)
+
+
+
+The idea behind generating the Fibonacci sequence is that each number is the sum of the two preceding ones. The sequence starts with 0 and 1, and continues as 0, 1, 1, 2, 3, 5, 8, 13, and so on.
+
+To generate this sequence in hardware, we use two registers, `prev` and `curr`, initialized to 0 and 1 respectively when the reset signal is asserted.
+
+When the reset signal is deasserted, we calculate the next value in the sequence. To do this, we first update the `prev` register to hold the current value of `curr`. Then, we calculate the next Fibonacci number using a combinational logic block, adding the values of `prev` and `curr` to get `curr_next`.
+
+Finally, the `curr` register is updated to hold the newly calculated Fibonacci number, `curr_next`, which is also the output of the circuit.
+
+{% code lineNumbers="true" %}
+```verilog
+module fib_generator #(parameter n=16) (
+    input logic clk,
+    input logic rst,
+    output logic [n-1:0] out);
+    
+    logic [n-1:0] prev;
+    logic [n-1:0] curr;
+    logic [n-1:0] curr_next;
+    
+    always_ff @(posedge clk or negedge rst) begin
+        if(reset) begin
+            prev <= 0;
+            curr <= 1;
+        end else begin
+            prev <= curr;
+            curr <= curr_next;
+        end
+    end
+    
+    //comb block to calculate curr_next, which is prev+curr values
+    always_comb begin
+        curr_next = prev + curr;
+        out = curr;
+    end
+    endmodule
+```
+{% endcode %}
+
+10\) Counting Ones
+
+
+
+Given an input binary value, output the number of bits that are equal to `1`.
+
+Input and Output Signals
+
+* `din` - Input value
+* `dout` - Number of `1`'s in the input value
+
+
+
+Idea :&#x20;
+
+So, this is simple circuit where we need to return the number of ones in a input. So, binary input is 0 and 1, so for finding the 1s we just need to add each bit value, which will return the number of 1s.
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module ones #(parameter n=16) (
+    input logic [n-1:0] din,
+    output logic [$clog2(n):0] dout);
+    
+    logic [$clog2(n):0] temp;
+    always_comb begin
+        for(int i=0; i<n; i++) begin
+            temp = temp + din[i];
+        end
+        dout = temp;
+    end
+    
+    endmodule
+    
+```
+{% endcode %}
+
+
+
+11\) Gray code to binary conversion
+
+
+
+Given a value, output its index in the standard Gray code sequence. This is known as converting a Gray code value to binary. Each input value's binary representation is an element in the Gray code sequence, and your circuit should output the index of the Gray code sequence the input value corresponds to. In the standard encoding the least significant bit follows a repetitive pattern of 2 on, 2 off ( `... 11001100 ...` ); the next digit a pattern of 4 on, 4 off ( `... 1111000011110000 ...` ); the nth least significant bit a pattern of 2n on 2n off.
+
+Input and Output Signals
+
+* `gray` - Input signal, interpreted as an element of the Gray code sequence
+* `bin` - Index of the Gray code sequence the input corresponds to
+
+
+
+Idea : So, when converting, the MSB of gray code will be same as MSB of binary bit. and rest of the bit are result of xor of all the bits when performed right shift thus dropping the i lsb bits,&#x20;
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module gray2binary #(parameter n = 16) (
+    input logic [n-1:0] gray,
+    output logic [n-1:0] binary);
+    
+    logic [n-1:0] temp;
+    
+    always_comb begin
+        temp = 0;
+        for(int i=0; i< n; i++) begin
+            temp[i] = ^(gray >> i);
+        end
+        binary = temp;
+    end
+    
+    endmodule
+
+```
+{% endcode %}
+
+
+
+12 ) Trailing zeros
+
+Find the number of trailing `0`s in the binary representation of the input (`din`). If the input value is all `0`s, the number of trailing `0`s is the data width (`DATA_WIDTH`)
+
+Input and Output Signals
+
+* `din` - Input value
+* `dout` - Number of trailing `0`s
+
+There are four trailing zeros in `0b1010000`. If we assume `DATA_WIDTH = 8`, there are `8` trailing zeros in `0b00000000`.
+
+
+
+Idea : quite interesting question, so here what we can do is implement this logic inside for loop by iterating through each and every element, and if i encounter 1, loop would break, else dout will be incremented to represent the trailing zeros. If all the bits are zero in the din, then dout would be data widht of the din.
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module trailingzeros #(parameter n = 16) (
+    input logic [n-1:0] din,
+    output logic [$clog2(n):0] dout);
+    
+    always_comb begin
+        dout = 0;
+        for(int i=0; i< n; i++) begin
+            if(din[i] == 1) begin
+                break;
+            end
+            dout = dout + 1;
+        end
+        if(din == 0) begin
+            dout = n;
+        end
+    end
+    endmodule
+```
+{% endcode %}
