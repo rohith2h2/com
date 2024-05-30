@@ -1,4 +1,4 @@
-# Chipdev series ( 1 to 10 )
+# Chipdev series
 
 Problems from chipdev series, which are relatively easier. In this Page we will go through the first 10 problems.
 
@@ -593,3 +593,178 @@ module trailingzeros #(parameter n = 16) (
     endmodule
 ```
 {% endcode %}
+
+
+
+13\) One hot detector
+
+One-hot values have a single bit that is a `1` with all other bits being `0`. Output a `1` if the input (`din`) is a one-hot value, and output a `0` otherwise.
+
+
+
+Idea : declare a counter and keep on incrementing it until the loop, and check if the counter is 1, return onehot as 1 else 0.
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module onehot #(parameter n = 16) (
+    input logic [n-1:0] din,
+    output logic onehot);
+    
+    logic [n-1:0] counter;
+    
+    always_comb begin
+        counter = 0;
+        for(int i=0;i<n; i++) begin
+            if(din[i] == 1) begin
+                counter = counter + 1;
+            end
+        end
+        assign onehot = (counter == 1);
+    end
+endmodule
+```
+{% endcode %}
+
+
+
+14 ) Build a module which controls a stopwatch timer. The timer starts counting when the start button (`start`) is pressed (pulses) and increases by `1` every clock cycle. When the stop button (`stop`) is pressed, the timer stops counting. When the reset button (`reset`) is pressed, the count resets to `0` and the timer stops counting. If count ever reaches `MAX`, then it restarts from `0` on the next cycle. `stop`'s functionality takes priority over `start`'s functionality, and `reset`'s functionality takes priority over both `stop` and `start`'s functionality.\
+\
+Idea :&#x20;
+
+So, when start is asserted in a clock cycle, from that clock cycle we should start counting until count reached max, and if we see stop then, we need to stop counting. Priority status is, when we have both start and stop asserted, then we need to given priority to stop and stop counting. so to know which state is currently active, we declare a reg state, which asserts to 0, when stop is asserted, in this way, if we check start loop,we have this statement : if(start || state)  state <= 1; count + 1;\
+so, if both start and state are 0, then count is same, and we need to write stop before start to give priority to stop.
+
+
+
+Complete code&#x20;
+
+{% code lineNumbers="true" %}
+```verilog
+module stopwatch #(parameter n =16,MAX = 99) (
+ input logic clk,
+ input logic start,
+ input logic stop,
+ input logic reset,
+ output logic [n-1:0] count);
+ 
+ logic [n-1:0] temp;
+ logic running;
+ 
+ always_ff @(posedge clk) begin
+  if(reset) begin
+    temp <= 0;
+    running <= 0;
+  end else if(stop) begin
+    temp <= temp;
+    running<= 0;
+  end else if(start || running) begin
+    running <= 1;
+    temp <= (temp == MAX) ? 0 : 1;
+  end
+  end
+  assign count = temp;
+  endmodule
+```
+{% endcode %}
+
+
+
+
+
+15 ) Sequence Detector - 1010
+
+
+
+Problem : we have to output 1 if we detect this sequence 1010.
+
+
+
+Idea, we will have a state machine with 5 states, 0 state, 1 state this the first element, and from here we will be checking the elements and keep on updating the state machine states.
+
+
+
+So when ever we write state machine its good practise to have two always blocks, one is sequential which stores the states and one is comb which updates the states.  and when we returning dout condition, its better to write a assign block and check the dout assert condition there. this eliminates any errors.
+
+
+
+below code is good practise on how to write the state machine\
+
+
+{% code lineNumbers="true" %}
+```verilog
+module s1010(
+    input logic clk,
+    input logic reset,
+    input logic din,
+    output logic dout);
+    
+    //state declaration
+    typedef enum {S0, S1, S10, S101, S1010} state;
+    state state_q;
+    state state_next;
+    
+    //sequential to store current state 
+    always_ff @(posedge clk) begin
+        if(!reset) begin
+        state_q <= S0;
+        end else begin
+        state_q <= state_next;
+        end
+    end
+    
+    always_comb begin
+        dout = 0;
+        
+        case(state_q)
+        
+        S0 : 
+        if(din == 1) begin
+        state_next = S1;
+        end else begin
+        state_next = S0;
+        end
+        
+        S1://1010
+        if(din == 1) begin
+        state_next = S1;
+        end else begin
+        state_next = S10;
+        end
+        
+        S10: //1010
+        if(din == 1) begin
+        state_next = S101;
+        end else begin
+        state_next = S0;
+        end
+        
+        S101: //1010
+        if(din == 0) begin
+        state_next = S1010;
+        end else begin
+        state_next = S1;
+        end
+        
+        S1010: 
+        if(din == 0) begin
+        state_next = S0;
+        end else begin
+        state_next = S101;
+        end
+        
+        endcase
+        end
+    assign dout = (state_q == S1010) ? 1 : 0;
+    endmodule
+        
+```
+{% endcode %}
+
+
+
+16\) divisible by 3
+
+
+
