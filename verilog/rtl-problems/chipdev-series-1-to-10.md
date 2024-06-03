@@ -766,5 +766,85 @@ module s1010(
 
 16\) divisible by 3
 
+Design a circuit that determines whether an input value is evenly divisible by three. The input value is of unknown length and is left-shifted one bit at a time into the circuit via the input (`din`). The circuit should output a `1` on the output (`dout`) if the current cumulative value is evenly divisible by three, and a `0` otherwise. When `resetn` is asserted, all previous bits seen on the input are no longer considered. The `0` seen during reset should not be included when calculating the next value. This problem is tricky, so it may help to think in terms of modulus and remainder states.
+
+
+
+Idea : We can solve this by writing a state machine. We will have 4 states, reset state, where basically we change to next state based on din, and from there we will be having three states which are remainder of 3 as rem0, rem1, rem2. when we get into rem0, thats where we found a number divisible by 3. We have a seperate blog about divide by 3 module on this site, go through that for state machine diagram.
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module div3 (
+    input logic clk,
+    input logic resetn,
+    input logic din,
+    output logic dout);
+    
+    typedef enum {rr, rem0, rem1, rem2} state;
+    state state_q;
+    state state_next;
+    
+    always_ff @(posedge clk) begin
+        if(!resetn) begin
+            state_q <= rr;
+        end else begin
+            state_q <= state_next;
+        end
+    end
+    
+    always_comb begin
+        dout = 0;
+        
+        case(state_q) 
+        
+        rr: 
+        if(din == 0) begin
+            state_next = rem0;
+        end else begin
+            state_next = rem1;
+        end
+        
+        rem0:
+        if(din == 1) begin
+            state_next = rem1;
+        end else begin
+            state_next = rem0; 
+        end
+        
+        rem1: //1_
+        if(din == 1) begin
+            state_next = rem0;
+        end else begin
+            state_next = rem2;
+        end
+        
+        rem2: //10
+        if(din == 1) begin
+            state_next = rem2;
+        end else begin
+            state_next = rem2;
+        end
+        
+        default : state_next = rr;
+        
+        endcase
+        
+        end
+        
+        assign dout = (state_q == rem0) ? 1 : 0;
+    endmodule
+```
+{% endcode %}
+
+
+
+17 ) Divisible by 5
+
+
+
+Design a module that determines whether an input value is evenly divisible by five. The input value is of unknown length and is left-shifted one bit at a time into the module via the input (`din`). The module should output a `1` on the output (`dout`) if the current cumulative value is evenly divisible by five and a `0` otherwise. When `resetn` is asserted, all previous bits seen on the input are no longer considered. The `0` seen during reset should not be included when calculating the next value. This problem is tricky, so it may help to think in terms of modulus and remainder states.
+
 
 

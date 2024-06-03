@@ -14,7 +14,13 @@
 * [Edge Capture](rtl-problems/edge-capture.md)
 * [Odd Even incrementer based on counter](rtl-problems/odd-even-incrementer-based-on-counter.md)
 * [Chipdev series](rtl-problems/chipdev-series-1-to-10.md)
+* [Status Bits](rtl-problems/status-bits.md)
+* [Weird counter](rtl-problems/weird-counter.md)
 
 ***
 
 * [Concept Questions](concept-questions.md)
+
+## Leetcode
+
+* [Day 1](leetcode/day-1.md)
