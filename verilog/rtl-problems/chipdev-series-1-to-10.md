@@ -848,3 +848,187 @@ Design a module that determines whether an input value is evenly divisible by fi
 
 
 
+idea : same as divisible by 3, here we have reset, rem0, rem1, rem2, rem3, rem4 states, and we will write fsm logic
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module divby5 (
+    input logic clk,
+    input logic reset,
+    input logic din,
+    output logic dout);
+    
+    typedef enum{r, r0, r1, r2, r3, r4} state;
+    state state_q;
+    state state_next;
+    
+    always_ff @(posedge clk) begin
+        if(!resetn) begin
+            state_q <= r;
+        end else begin
+            state_q <= state_next;
+        end
+    end
+
+    always_comb begin
+        dout = 0;
+        case(state_q)
+            r:
+            if(din == 0) begin state_next = r0; end else begin state_next = r1; end
+            
+            r0:
+            if(din == 0) begin state_next = r0; end else begin state_next = r1; end
+            
+            r1://1
+            if(din == 0) begin state_next = r2; end else begin state_next = r3; end
+            
+            r2: //10
+            if(din == 0) begin state_next = r4; end else begin state_next = r0; end
+            
+            r3: //11
+            if(din == 0) begin state_next = r1; end else begin state_next = r2; end
+            
+            r4://100
+            if(din == 0) begin state_next = r3; end else begin state_next = r4; end
+            
+            default : state_next = r;
+            
+        endcase
+    end
+    
+    assign dout = (state_q == r0) ? 1 : 0;
+    endmodule
+```
+{% endcode %}
+
+
+
+18 ) Palindrome Detector :&#x20;
+
+Given an input (`din`), output (`dout`) a `1` if its binary representation is a palindrome and a `0` otherwise. A palindrome binary representation means that the binary representation has the same sequence of bits whether you read it from left to right or right to left. Leading `0`s are considered part of the input binary representation.
+
+
+
+So basically there are two solutions which depends on how the input is streamed in.&#x20;
+
+lets dive in, assume there is number which is 32 bit data width,  and to check whether this number is palindrome or not, we need to divide the number and check from each ends bit by bit to see palindrome or nor.
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module palin #(n=32) (
+    input logic [n-1:0] din,
+    output logic out );
+    
+    logic seen;
+    
+    always_comb begin
+        seen = 1;
+        for(int i=0; i<n/2; i++) begin
+            if(din[i] != din[n-1-i] begin
+                seen = 0;
+            end
+        end
+    end
+    assign out = seen;
+    
+    endmodule
+```
+{% endcode %}
+
+
+
+Case 2 : palindrome or not of 3 bit number. And the input bits are streamed in every cycle. So, here we will be using shift registers and shift the bits streamed in every cycle. and we use a counter to count till 2, we will be checking for count\[1] bit is set or not, if it is set, then we start to check shift\_q\[1] bit and streamed in bit, if they match then the 3 bit number is a palindrome else it is not.
+
+
+
+{% code lineNumbers="true" %}
+```verilog
+module palindrom3b (
+    input logic clk,
+    input logic reset,
+    input logic din,
+    output logic seen);
+    
+    logic [1:0] count_q;
+    logic [1:0] count_next;
+    logic [1:0] shift_q;
+    logic [1:0] shift_next;
+    
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) begin
+            count_q <= 0;
+            shift_q <= 0;
+        end else begin
+            count_q <= count_next;
+            shift_q <= shift_next;
+        end
+    end
+    
+    always_comb begin
+        count_next = count_q[1] ? count_q : count_q+1;
+        shift_next = {shift_q[0], din};
+    end
+    assign seen = ( (shift_q[1] == din) && count_q[1] ) ? 1 : 0;
+    
+endmodule
+```
+{% endcode %}
+
+
+
+19 ) Programmable sequence detector :&#x20;
+
+Given a stream of input bits, pulse a `1` on the output (`seen`) whenever a specified 5-bit target sequence is detected on the input (`din`). The target sequence is specified by `init` and is updated whenever the reset-low signal (`resetn`) is deasserted. The target sequence is always a 5-bit value, so left-padded `0`'s are also considered part of the sequence (a sequence specified as `b11` would actually be `b00011`). When `resetn` goes active, all previously seen bits on the input are no longer considered when searching for the target sequence.\
+\
+Idea : this problem is a bit different, like previous sequence detector, the value of sequence will not be fixed and changes when reset is applied, and new sequence is stored.
+
+
+
+So there is target sequence specified by init, and we need to check that with our stored sequence which we get every cycle. For that we have a shift register which shifts and store each bit streamed in every cycle. while assigining new init value, we will check following cases, we will check new\_seq flag which is set once reset is asserted, and we check for reset is high, and check the counter value is 0, which will be set in reset. If this conditions are true, we set init as seq. else seq will be seq.
+
+
+
+and for detecting sequence we have seen which will be set to 1, if seq == shift\_q and counter == 5, else 0
+
+{% code lineNumbers="true" %}
+```verilog
+module programmableseq (
+    input logic clk,
+    input logic reset,
+    input logic din,
+    input logic [4:0] init,
+    output logic seen );
+    
+    logic new_seq;
+    logic [4:0] shift_q;
+    logic [4:0] shift_next;
+    logic [4:0] seq;
+    logic [2:0] count_q;
+    logic [2:0] count_next;
+    
+    assign seq = ( (new_seq) & (reset) & (count_q) ) ? init : seq;
+    always_ff @(posedge clk) begin
+        if(!reset) begin
+            new_seq <= 1;
+            count_q <= 0;
+            shift_q <= 0;
+        end else begin
+            count_q <= count_next;
+            shift_q <= shift_nextl
+        end
+    end
+    always_comb begin
+        shift_next = {shift_q[3:0], din};
+        count_next = (count < 5) ? count+1:count;
+    end
+    assign seen = (shift_q == seq) & count == 5 ? 1 : 0;
+    
+    endmodule
+    
+```
+{% endcode %}
+

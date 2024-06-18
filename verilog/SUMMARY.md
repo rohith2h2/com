@@ -16,6 +16,7 @@
 * [Chipdev series](rtl-problems/chipdev-series-1-to-10.md)
 * [Status Bits](rtl-problems/status-bits.md)
 * [Weird counter](rtl-problems/weird-counter.md)
+* [Edge detector](rtl-problems/edge-detector.md)
 
 ***
 
