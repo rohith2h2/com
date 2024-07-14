@@ -87,3 +87,44 @@ initial begin
 endmodule
 ```
 
+
+
+<mark style="color:red;">Randomize a variable and make sure the current variable is not same as the previous variable</mark>
+
+For this we use this constraint con { !(a inside {queue}); }
+
+this constraint is for a inside queue should be false, thus we get variable which is not seen.
+
+Think this is used when we dont want to use randc and generate random variable. maybe not as randc will be generating random variables without repeating until all values are seen.
+
+```verilog
+class a;
+rand bit [3:0] val;
+int queue[$:7];
+
+constraint con { !(val inside {queue} ); }
+
+function void post_randomize();
+if(queue.size() >= 6)
+    queue.pop_back();
+
+queue.push_front(val);
+
+$display("varaible = %0d", val);
+$display("array = %0p", queue);
+endfunction
+endclass
+
+module tb();
+a a1;
+initial begin
+    a1 = new();
+    repeat(10) begin
+    a1.randomize();
+    end
+    end
+    endmodule
+```
+
+
+
