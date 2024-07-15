@@ -353,3 +353,93 @@ This can be fixed by introducing buffer or delay elements into the pipelines or 
 
 
 
+<mark style="color:red;">"Explain the concepts of ideal path and false path constraints in synthesis. How and when would you use them?"</mark>
+
+Synthesis constraints are crucial for guiding the synthesis tool to optimize the design correctly.&#x20;
+
+Ideal path: path assumed to have zero delays during timing analysis.&#x20;
+
+False path: A false path is a logical path in a digital circuit that exists in the netlist or RTL description but is not relevant for timing analysis because it will never be functionally active or doesn't need to meet timing constraints. Essentially, it's a path that the signals will never actually traverse during normal operation of the circuit.
+
+Key points about false paths:
+
+1. They are usually specified to the synthesis and static timing analysis (STA) tools.
+2. Identifying false paths can help relax timing constraints and improve overall design performance.
+3. They're often found in complex control logic or multi-clock domain designs.
+
+
+
+
+
+<mark style="color:red;">Describe open page and closed page policies in DRAM memory systems. What are their trade-offs.</mark>
+
+Open page and closed page are memory management strategies in DRAM systems.&#x20;
+
+Open page : keeps the Most recently accessed row(page) in sense amplifier, anticipating future access to same row.
+
+Closed page : closes the page access after each access.
+
+
+
+<mark style="color:red;">Synchronous vs Asynchronous reset: Which is better?</mark>
+
+Synchronous Reset: In a synchronous reset, the reset signal is sampled on the active edge of the clock. The state elements (like flip-flops) change their state only on the clock edge when the reset is active.
+
+Asynchronous Reset: An asynchronous reset can change the state of flip-flops immediately, regardless of the clock signal. It typically uses the asynchronous input of flip-flops.
+
+Now, let's look at the pros and cons of each:
+
+Synchronous Reset:
+
+Pros:
+
+1. Predictable timing: Since the reset occurs only on clock edges, the behavior is more predictable and easier to analyze in timing simulations.
+2. Easier to implement in FPGAs: Many FPGA architectures are optimized for synchronous resets, making them easier to implement and potentially faster.
+3. Reduced metastability risk: Because the reset is synchronous with the clock, there's less chance of metastability issues when the reset is released.
+
+Cons:
+
+1. Longer reset time: The system must wait for the next clock edge to reset, which can be an issue in time-critical applications.
+2. More complex reset tree: Ensuring that the reset reaches all flip-flops at the same clock edge can be challenging in large designs, potentially leading to clock skew issues.
+3. Higher power consumption: The clock tree must be active for the reset to propagate, which can increase power consumption during reset.
+
+Asynchronous Reset:
+
+Pros:
+
+1. Immediate response: The system can be reset instantly, without waiting for a clock edge, which is crucial in some safety-critical systems.
+2. Simpler reset distribution: The reset signal doesn't need to be synchronized with the clock, simplifying the reset tree design.
+3. Can operate without a clock: Useful in systems where the clock might not be reliable or available immediately after power-up.
+
+Cons:
+
+1. Potential for metastability: If the reset is released close to a clock edge, it can cause metastability issues, leading to unpredictable behavior.
+2. More challenging timing analysis: The asynchronous nature makes it harder to predict and analyze timing in complex systems.
+3. Recovery time issues: Flip-flops have specific timing requirements (recovery time) after an asynchronous reset, which can be challenging to meet in high-speed designs.
+
+In practice, the choice between synchronous and asynchronous reset often depends on the specific requirements of the system. For example:
+
+* In a safety-critical system that needs to respond to faults immediately, an asynchronous reset might be preferred.
+* In a high-speed, complex FPGA design, a synchronous reset might be more suitable for its predictability and ease of implementation.
+
+Some designers even use a combination of both: an asynchronous reset for initial power-up, followed by synchronous resets for normal operation. This approach aims to combine the immediate response of asynchronous reset with the predictability of synchronous reset.
+
+
+
+<mark style="color:red;">Asynchronous FIFO:</mark>
+
+Used in data transfer between two different clock domains.&#x20;
+
+
+
+<mark style="color:red;">3 by 1 MUX using 2 by 1 MUX</mark>
+
+This can be done in cascaded approach, we can build 3:1 mux using two 2:1 muxes, mux1 has inputs a and b, whose output is one of the inputs to mux2 along with third input c, thus s0 and s1 are select lines for mux 1 and mux 2, thus creating a 3:1 mux.
+
+<mark style="color:red;">detect this sequence 110011</mark>
+
+```verilog
+```
+
+
+
