@@ -6,7 +6,11 @@ description: >-
 
 # Interview Questions(unorganised)
 
-1. Why we need both types of coverage(code and functional) ?
+
+
+<details>
+
+<summary><mark style="color:red;">Why we need both types of coverage(code and functional) ?</mark></summary>
 
 Getting to 100% code coverage, doesnt necessarily tell the complete story. Example, imagine a simple AND gate, to get to 100% code coverage, we only need two different types of input combinations - 00 and 11, these two will produce all the output combinations. Then the coverage tells all the code was exercised but we dont know whether our design works or not. all we know is input and outputs of our design are able to take on both logic 0 and logic 1. We couldn't certainly tell our design is an AND gate, it could also be an OR gate.  And this is where functional coverage comes in, So the first thing funtional coverage tells is have observed all the possible values on input. and checking the input and its output tells us which gate we are looking at.&#x20;
 
@@ -18,11 +22,11 @@ Also getting 100% functional coverage is not enough either, Imaginer we have two
 
 And getting 100% on both code and functional coverage doesn't mean our design is bug free. But it gives confidence, that our design in thoroughlt exercised based on the specifications provided.&#x20;
 
+</details>
 
+<details>
 
-
-
-<mark style="color:red;">Design FSM which detects three consecutive 1's with overlapping. use mealy machine.(AMD)</mark>
+<summary><mark style="color:red;">Design FSM which detects three consecutive 1's with overlapping. use mealy machine.(AMD)</mark></summary>
 
 For combinational circuits, output value completely depends on input values, In sequential circuits output value depends on present input and also previously stored value. Sequentail circuits are FSM. There are two types Mealy and Moore.&#x20;
 
@@ -37,6 +41,10 @@ Overlapping : Final bits of sequence can be start of another sequence.&#x20;
 Non overlapping : Once sequence detection is completed, next sequence can be started without any overlap.&#x20;
 
 Refer this for detail with diagrams: [https://yue-guo.com/2018/11/18/sequence-detector-1001-moore-machine-mealy-machine-overlapping-non-overlapping/](https://yue-guo.com/2018/11/18/sequence-detector-1001-moore-machine-mealy-machine-overlapping-non-overlapping/)
+
+below is code block
+
+</details>
 
 ```verilog
 //111
@@ -174,7 +182,9 @@ endclass
 
 
 
-<mark style="color:red;">Cache Size is 64KB, Block size is 32B and the cache is Two-Way Set Associative. For a 32-bit physical address, find the bit number of Block Offset, Index and Tag.(AMD)</mark>
+<details>
+
+<summary><mark style="color:red;">Cache Size is 64KB, Block size is 32B and the cache is Two-Way Set Associative. For a 32-bit physical address, find the bit number of Block Offset, Index and Tag.(AMD)</mark></summary>
 
 calculation of tag bits = L - Set index - Block offset
 
@@ -186,13 +196,17 @@ set index is calculated with no of set in total cache, for that cache blocks sho
 
 tag = 32 - 10 - 5 = 17 bits
 
+</details>
+
 
 
 Apple GPU DV
 
 Computer architecture related questions. (covered all basic stuff from pipeline, cache, virtual memory, OOO)
 
-<mark style="color:red;">Pipeline Hazards :</mark>&#x20;
+<details>
+
+<summary><mark style="color:red;">Pipeline Hazards :</mark> </summary>
 
 Imagine you're designing a 5-stage pipeline for a RISC processor. You notice that for certain instruction sequences, the pipeline stalls frequently. Can you explain what might be causing this, and propose a solution?
 
@@ -214,7 +228,11 @@ possible rearrange instructions, to introduce independent instruction between de
 
 <mark style="color:green;">Pipeline interlocking</mark> detect hazads in decode stage and introduce NOPs or stall pipeline when needed.
 
-<mark style="color:red;">Cache</mark>
+</details>
+
+<details>
+
+<summary><mark style="color:red;">Cache</mark></summary>
 
 working on a system where the main bottleneck is memory access time. You've been asked to design a cache system to improve performance. What factors would you consider, and how would you approach this design?
 
@@ -232,15 +250,17 @@ OOO is a technique in modern processor utilize instruction level parallelism, oo
 
 How it works: a) Instructions are fetched and decoded. b) They're placed in reservation stations, waiting for their operands to be ready. c) As soon as an instruction's operands are available, it can be executed, regardless of program order. d) Results are placed in the reorder buffer. e) Instructions are retired (committed) in program order to maintain correct program state.
 
+</details>
+
+<details>
+
+<summary><mark style="color:red;">Gave spec for a design and asked to come up with a test plan for same. Then asked to implement the discussed checks in a scoreboard.</mark></summary>
 
 
-<mark style="color:red;">Gave spec for a design and asked to come up with a test plan for same. Then asked to implement the discussed checks in a scoreboard.</mark>
 
-
+</details>
 
 Implement checks in scoreboard
-
-
 
 ```verilog
 class my_scoreboard extends uvm_scoreboard;
@@ -311,7 +331,9 @@ module fibonacci(
             
 ```
 
-<mark style="color:red;">Can you explain OOP concepts in SystemVerilog</mark>
+<details>
+
+<summary><mark style="color:red;">Can you explain OOP concepts in SystemVerilog</mark></summary>
 
 Inheritance: is the ability to create child class(derived class) from parent class(base class) to reuse properties and methods of base class.
 
@@ -319,11 +341,13 @@ Polymorphism:Ability to process objects differently based on their data members.
 
 abstraction: is the ability to hide the information from different classes.
 
-encapsulation: including or joining the data member and methods into a single unit like class.\
-\
+encapsulation: including or joining the data member and methods into a single unit like class.
 
+</details>
 
-<mark style="color:red;">Implement (A+B+C+D). (A+B+C+E). (A+B+C+F) using one 4-input OR gate and one 3-input AND gate.</mark>
+<details>
+
+<summary><mark style="color:red;">Implement (A+B+C+D). (A+B+C+E). (A+B+C+F) using one 4-input OR gate and one 3-input AND gate.</mark></summary>
 
 As A+B+C is common across three expressions, we can write the whole expression like this
 
@@ -331,13 +355,19 @@ As A+B+C is common across three expressions, we can write the whole expression l
 
 here D.E.F can be implemented using 3 input AND gate and lets assume X is output of this 3 input AND gate and we OR that with the above expression (A+B+C+X), which we need a 4 input OR gate to implement, solving the expression using 3 input AND and 4 input OR gate
 
+</details>
 
+<details>
 
-<mark style="color:red;">This was more like a discussion rather than an interview. Interviewer shared his screen with a design that had 3 masters, an arbiter, and an ALU. (ALU was on different clock domain, so there was a FIFO in between) Interviewer asked about the testbench architecture and many implementation specifics for the TB.</mark>
+<summary><mark style="color:red;">This was more like a discussion rather than an interview. Interviewer shared his screen with a design that had 3 masters, an arbiter, and an ALU. (ALU was on different clock domain, so there was a FIFO in between) Interviewer asked about the testbench architecture and many implementation specifics for the TB.</mark></summary>
 
 So, UVM components needed for these are, 3 Master are there, so we need three agents for each of the master's, we need a monitor for arbiter, ALU, FIFO monitor, scoreboard, Virtual sequencer, ENV
 
-<mark style="color:red;">Can you explain setup and hold time violations, their impact on a design, and how you would address them?</mark>
+</details>
+
+<details>
+
+<summary><mark style="color:red;">Can you explain setup and hold time violations, their impact on a design, and how you would address them?</mark></summary>
 
 Setup time and hold time violations are crucial timing violations in digital design that lead to metastability and functional errors
 
@@ -351,9 +381,13 @@ Hold time violation: Occurs when the data changes too quickly after the clock ed
 
 This can be fixed by introducing buffer or delay elements into the pipelines or short paths, Optimize clock tree to reduce clock skew, &#x20;
 
+</details>
+
+<details>
+
+<summary><mark style="color:red;">Explain the concepts of ideal path and false path constraints in synthesis. How and when would you use them?"</mark></summary>
 
 
-<mark style="color:red;">"Explain the concepts of ideal path and false path constraints in synthesis. How and when would you use them?"</mark>
 
 Synthesis constraints are crucial for guiding the synthesis tool to optimize the design correctly.&#x20;
 
@@ -367,11 +401,11 @@ Key points about false paths:
 2. Identifying false paths can help relax timing constraints and improve overall design performance.
 3. They're often found in complex control logic or multi-clock domain designs.
 
+</details>
 
+<details>
 
-
-
-<mark style="color:red;">Describe open page and closed page policies in DRAM memory systems. What are their trade-offs.</mark>
+<summary><mark style="color:red;">Describe open page and closed page policies in DRAM memory systems. What are their trade-offs.</mark></summary>
 
 Open page and closed page are memory management strategies in DRAM systems.&#x20;
 
@@ -379,9 +413,11 @@ Open page : keeps the Most recently accessed row(page) in sense amplifier, antic
 
 Closed page : closes the page access after each access.
 
+</details>
 
+<details>
 
-<mark style="color:red;">Synchronous vs Asynchronous reset: Which is better?</mark>
+<summary><mark style="color:red;">Synchronous vs Asynchronous reset: Which is better?</mark></summary>
 
 Synchronous Reset: In a synchronous reset, the reset signal is sampled on the active edge of the clock. The state elements (like flip-flops) change their state only on the clock edge when the reset is active.
 
@@ -424,22 +460,28 @@ In practice, the choice between synchronous and asynchronous reset often depends
 
 Some designers even use a combination of both: an asynchronous reset for initial power-up, followed by synchronous resets for normal operation. This approach aims to combine the immediate response of asynchronous reset with the predictability of synchronous reset.
 
+</details>
 
+<details>
 
-<mark style="color:red;">Asynchronous FIFO:</mark>
+<summary><mark style="color:red;">Asynchronous FIFO:</mark></summary>
 
 Used in data transfer between two different clock domains.&#x20;
 
+</details>
 
+<details>
 
-<mark style="color:red;">3 by 1 MUX using 2 by 1 MUX</mark>
+<summary><mark style="color:red;">3 by 1 MUX using 2 by 1 MUX</mark></summary>
 
 This can be done in cascaded approach, we can build 3:1 mux using two 2:1 muxes, mux1 has inputs a and b, whose output is one of the inputs to mux2 along with third input c, thus s0 and s1 are select lines for mux 1 and mux 2, thus creating a 3:1 mux.
+
+</details>
 
 <mark style="color:red;">detect this sequence 110011</mark>
 
 ```verilog
 ```
 
-
+<mark style="color:red;">Asynchronous FIFO: How to design and problems faced?</mark>
 
