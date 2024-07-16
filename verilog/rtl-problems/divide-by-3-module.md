@@ -25,6 +25,6 @@ if x_i = 0, {4a+2, 0}, then 8a+4, remainder will be 1, moves to state (1)
 if x_i = 1, {4a+2, 1}, then 8a+5, remainder will be 2, moves to state (2)
 ```
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 [ans link here](https://www.edaplayground.com/x/8qq2)

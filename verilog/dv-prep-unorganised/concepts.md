@@ -6,24 +6,6 @@ description: >-
 
 # Interview Questions(unorganised)
 
-
-
-<details>
-
-<summary><mark style="color:red;">Why we need both types of coverage(code and functional) ?</mark></summary>
-
-Getting to 100% code coverage, doesnt necessarily tell the complete story. Example, imagine a simple AND gate, to get to 100% code coverage, we only need two different types of input combinations - 00 and 11, these two will produce all the output combinations. Then the coverage tells all the code was exercised but we dont know whether our design works or not. all we know is input and outputs of our design are able to take on both logic 0 and logic 1. We couldn't certainly tell our design is an AND gate, it could also be an OR gate.  And this is where functional coverage comes in, So the first thing funtional coverage tells is have observed all the possible values on input. and checking the input and its output tells us which gate we are looking at.&#x20;
-
-
-
-Also getting 100% functional coverage is not enough either, Imaginer we have two AND gates whos outputs are given to OR gate and output is taken there. Now we might simply attain 100% functional coverage by defining coverpoints for one AND gate and final output but not exercising the other AND gate.This is called coverage hole and This is where Code coverage becomes crucial, Cause it shows there is a part of code which is not exercised at all.&#x20;
-
-
-
-And getting 100% on both code and functional coverage doesn't mean our design is bug free. But it gives confidence, that our design in thoroughlt exercised based on the specifications provided.&#x20;
-
-</details>
-
 <details>
 
 <summary><mark style="color:red;">Design FSM which detects three consecutive 1's with overlapping. use mealy machine.(AMD)</mark></summary>
@@ -44,8 +26,6 @@ Refer this for detail with diagrams: [https://yue-guo.com/2018/11/18/sequence-de
 
 below is code block
 
-</details>
-
 ```verilog
 //111
 typedef enum {s0, s1, s2} state;
@@ -61,13 +41,15 @@ always_comb begin
         s2:if(din == 1) begin state_next = s2; dout = 1; end else state_next = s0;
     endcase
 end
-
-
 ```
 
-<mark style="color:red;">Perl/Python coding question(AMD)</mark>
+</details>
 
-<figure><img src="../.gitbook/assets/Screenshot 2024-07-10 at 7.33.44 PM.png" alt="" width="103"><figcaption></figcaption></figure>
+<details>
+
+<summary><mark style="color:red;">Perl/Python coding question(AMD)</mark></summary>
+
+<img src="../.gitbook/assets/image.png" alt="" data-size="line">
 
 ```python
 data = [ {"ID" : 11, "value":55},  {"ID": 10, "value": 37}, {"ID": 1, "value": 28},
@@ -79,9 +61,9 @@ filtered_data = [record for record in data if record["ID"] == 11]
 sorted_data = sorted(filtered_data, key = lambda x: x["value"] )
 for record in sorted_data
     print(record)
-```
+    
 
-```perl
+//perl code
 use strict;
 use warnings;
 # Define the data as an array of hashes
@@ -107,9 +89,11 @@ foreach my $record (@sorted_data) {
 }
 ```
 
+</details>
 
+<details>
 
-<mark style="color:red;">write a uvm driver for a simple bus protocol(AMD)</mark>
+<summary><mark style="color:red;">write a uvm driver for a simple bus protocol(AMD)</mark></summary>
 
 ```verilog
 interface intf(input bit clk, input bit rst);
@@ -127,14 +111,12 @@ the physical interface above;
 
 Please implement the run_phase of your driver. 
 
+answer:
+//You need to drive the Addr,, WrData generated sequence items from sequencer 
+to virtual interface connecting DUT. For that we implemented the below driver 
+logic, seq_item_port.get_next_item(), seq_item_port.try_next_item(), 
+seq_item_port.item_done(), 
 
-```
-
-
-
-You need to drive the Addr,, WrData generated sequence items from sequencer to virtual interface connecting DUT. For that we implemented the below driver logic, seq\_item\_port.get\_next\_item(), seq\_item\_port.try\_next\_item(), seq\_item\_port.item\_done(),&#x20;
-
-```verilog
 class my_driver extends uvm_driver #(my_transaction);
   `uvm_component_utils(my_driver)
   
@@ -178,9 +160,10 @@ class my_driver extends uvm_driver #(my_transaction);
   endtask
   
 endclass
+
 ```
 
-
+</details>
 
 <details>
 
@@ -197,8 +180,6 @@ set index is calculated with no of set in total cache, for that cache blocks sho
 tag = 32 - 10 - 5 = 17 bits
 
 </details>
-
-
 
 Apple GPU DV
 
@@ -260,7 +241,9 @@ How it works: a) Instructions are fetched and decoded. b) They're placed in rese
 
 </details>
 
-Implement checks in scoreboard
+<details>
+
+<summary><mark style="color:red;">Implement checks in scoreboard</mark></summary>
 
 ```verilog
 class my_scoreboard extends uvm_scoreboard;
@@ -300,36 +283,7 @@ virtual function void write(my_transaction trans);
  
 ```
 
-<mark style="color:red;">Can you write a SystemVerilog code to generate the Fibonacci series</mark>
-
-```verilog
-module fibonacci(
-    input logic clk,
-    input logic rst,
-    output logic o);
-    
-    logic first;
-    logic second;
-    logic curr;
-    
-    always_ff @(posedge clk) begin
-        if(rst) begin
-            first <= 1;
-            second <= 1;
-        end else begin
-            first <= second;
-            second <= curr
-        end
-    end
-    always_comb begin
-        curr = first+second;
-        out = curr;  
-    end
-    
-    endmodule
-  
-            
-```
+</details>
 
 <details>
 
@@ -478,10 +432,41 @@ This can be done in cascaded approach, we can build 3:1 mux using two 2:1 muxes,
 
 </details>
 
-<mark style="color:red;">detect this sequence 110011</mark>
+<details>
+
+<summary><mark style="color:red;">detect this sequence 110011</mark></summary>
+
+
+
+</details>
+
+<details>
+
+<summary><mark style="color:red;">Asynchronous FIFO: How to design and problems faced?</mark></summary>
+
+Core of FIFO is basically a dual port RAM allowing simultaneous read and write operations, we also need seperate read and write pointers operating in there clock domains, To safely cross clock domains we use gray counters for the pointers, Gray code changes only one bit at a time reducing metastability issues.&#x20;
+
+</details>
+
+<details>
+
+<summary><mark style="color:red;">Constraint to generate gray code</mark></summary>
 
 ```verilog
+class c;
+rand [2:0] g[8];
+
+constraint c{ foreach(g[i]) {
+                                g[i] = {i[2], i[2]^i[1], i[1]^i[0] };
+                                }
+endclass
+module a;
+a i =new();
+initial begin
+i.randomize();
+end
+endmodule
 ```
 
-<mark style="color:red;">Asynchronous FIFO: How to design and problems faced?</mark>
+</details>
 
