@@ -8,91 +8,6 @@ description: >-
 
 <details>
 
-<summary><mark style="color:red;">Design FSM which detects three consecutive 1's with overlapping. use mealy machine.(AMD)</mark></summary>
-
-For combinational circuits, output value completely depends on input values, In sequential circuits output value depends on present input and also previously stored value. Sequentail circuits are FSM. There are two types Mealy and Moore.&#x20;
-
-Mealy : Output depends on present state and current input. Requires Fewer states. Bit harder
-
-Moore : Output depends on current state only independent of current input. Need more state. Easier
-
-There are again two conditions overlapping and non overlapping.
-
-Overlapping : Final bits of sequence can be start of another sequence.&#x20;
-
-Non overlapping : Once sequence detection is completed, next sequence can be started without any overlap.&#x20;
-
-Refer this for detail with diagrams: [https://yue-guo.com/2018/11/18/sequence-detector-1001-moore-machine-mealy-machine-overlapping-non-overlapping/](https://yue-guo.com/2018/11/18/sequence-detector-1001-moore-machine-mealy-machine-overlapping-non-overlapping/)
-
-below is code block
-
-```verilog
-//111
-typedef enum {s0, s1, s2} state;
-state state_q;
-state state_next;
-
-always_ff @(posedge clk) begin
-    if(rst) state_q <= s0; else state_q <= state_next; end
-always_comb begin
-    case(state_q)
-        s0:if(din == 1) state_next = s1; else state_next = s0;
-        s1:if(din == 1) state_next = s2; else state_next = s0;
-        s2:if(din == 1) begin state_next = s2; dout = 1; end else state_next = s0;
-    endcase
-end
-```
-
-</details>
-
-<details>
-
-<summary><mark style="color:red;">Perl/Python coding question(AMD)</mark></summary>
-
-<img src="../.gitbook/assets/image.png" alt="" data-size="line">
-
-```python
-data = [ {"ID" : 11, "value":55},  {"ID": 10, "value": 37}, {"ID": 1, "value": 28},
-    {"ID": 11, "value": 78},{"ID": 0, "value": 33},{"ID": 1, "value": 25},{"ID": 11, "value": 67},
-    {"ID": 1, "value": 90},{"ID": 10, "value": 58},{"ID": 11, "value": 102},
-]
-
-filtered_data = [record for record in data if record["ID"] == 11]
-sorted_data = sorted(filtered_data, key = lambda x: x["value"] )
-for record in sorted_data
-    print(record)
-    
-
-//perl code
-use strict;
-use warnings;
-# Define the data as an array of hashes
-my @data = (
-    { ID => 11, value => 55 },
-    { ID => 10, value => 37 },
-    { ID => 1, value => 28 },
-    { ID => 11, value => 78 },
-    { ID => 0, value => 33 },
-    { ID => 1, value => 25 },
-    { ID => 11, value => 67 },
-    { ID => 1, value => 90 },
-    { ID => 10, value => 58 },
-    { ID => 11, value => 102 },
-);
-# Filter records with ID == 11
-my @filtered_data = grep { $_->{ID} == 11 } @data;
-# Sort the filtered data by the 'value' key
-my @sorted_data = sort { $a->{value} <=> $b->{value} } @filtered_data;
-# Print the sorted data
-foreach my $record (@sorted_data) {
-    print "ID: $record->{ID}, value: $record->{value}\n";
-}
-```
-
-</details>
-
-<details>
-
 <summary><mark style="color:red;">write a uvm driver for a simple bus protocol(AMD)</mark></summary>
 
 ```verilog
@@ -444,7 +359,14 @@ This can be done in cascaded approach, we can build 3:1 mux using two 2:1 muxes,
 
 <summary><mark style="color:red;">Asynchronous FIFO: How to design and problems faced?</mark></summary>
 
-Core of FIFO is basically a dual port RAM allowing simultaneous read and write operations, we also need seperate read and write pointers operating in there clock domains, To safely cross clock domains we use gray counters for the pointers, Gray code changes only one bit at a time reducing metastability issues.&#x20;
+```verilog
+//Asynchronous FIFO
+
+```
+
+Core of FIFO is basically a dual port RAM allowing simultaneous read and write operations, we also need separate read and write pointers operating in there clock domains, To safely cross clock domains we use gray counters for the pointers, Gray code changes only one bit at a time reducing metastability issues.&#x20;
+
+
 
 </details>
 
@@ -469,4 +391,203 @@ endmodule
 ```
 
 </details>
+
+<details>
+
+<summary>Explain what a glitch is? when it can occur, and how to resolve it?</summary>
+
+A Glitch in digital circuit is a short, unwanted transition of a signal, that occurs before the signal settles to its intended value. Glitches causes significant issues, mainly in synchronous design where they mess up the setup and hold times of FF.  these occurs in combinational logic, due to propagation delay through different paths. Some techniques to resolve, use inertial delay built in gates, which filters out pulses shorter than certain duration.&#x20;
+
+</details>
+
+<details>
+
+<summary>Discuss static and dynamic power in digital circuits and ways to reduce both?</summary>
+
+
+
+</details>
+
+<details>
+
+<summary>Why we use create method in UVM</summary>
+
+
+
+```verilog
+// As my_env_config_obj is extended from uvm_object, create method
+// requires object name only.
+m_env_cfg = my_env_config_obj::type_id::create("m_env_cfg");
+
+// my_env is extended from uvm_component and it requires name as well as parent 
+// type name, given by 'this'
+m_env = my_env::type_id::create("my_env", this);
+```
+
+We use **create()** method because, if any overrides are registered with the factory, the create method returns object of override type(by type I mean type of class). So, basically we get child object on parent handle if overrides are registered. Whereas **new()** method returns object of type its being called on.
+
+</details>
+
+<details>
+
+<summary>Difference between start_item() and start() ?</summary>
+
+start\_item() is a method of an already running sequence - the sequencer was set when you started it. start\_item/finish\_item is used to send transactions to a driver, and thus _must_ be connected to a sequencer.
+
+start() is a method of a sequence object you just created, and in turn calls its body() method. You pass in a sequencer to the start() method if you want the sequence body to call the start\_item() method.
+
+</details>
+
+<details>
+
+<summary>Write a constraint where you have a 32 bit value bit [31:0] val where you’d want to randomize this to where every randomization would only allow 2 bits to differ from the previous randomization.</summary>
+
+```verilog
+class abc;
+  rand bit [31:0] cur_val;
+  constraint sel{
+    $countones( const'(cur_val)^cur_val)==2;
+  }
+endclass
+```
+
+</details>
+
+<details>
+
+<summary>Connections in UVM</summary>
+
+In driver, we have this seq\_item\_port.get\_next\_item(tr), which sends req to sequencer, and after completing we will send seq\_item\_port.item\_done(), to specify item is done.
+
+In monitor, we have analysis port to send transactions to scoreboard, it is written as uvm\_analysis\_port#(transaction) send; and we add constructor in build\_phase like this    send = new("send", this); after getting the values from dut through vif, we use write method to send data to scoreboard.     send.write(tr);
+
+In scoreboard, we receive data from monitor and compare data with predictor(golden predictor) data, for getting data from monitor, we have implementation port
+
+uvm\_analysis\_imp#(transaction, scoreboard(currentscoreboard) ) recv;                     constructor in build\_phase -> recv = new("recv", this);                                                                    here in scoreboard we have write method which we used in monitor\
+write method of the scoreboard will receive the transaction packet from the monitor, on calling write method from the monitor.&#x20;
+
+
+
+In agent class, we use connect\_phase to connect the driver and sequencer in this way,  d.seq\_item\_port.connect(seqr.seq\_item\_export); we do this in connect\_phase function.
+
+In evn class, we connect the driver and scoreboard in connect\_phase function as below, we will first call instance of agent and access mon through that instance like this, a.mon.send.connect(s.recv); send is monitor port, recv is scoreboard imp port, thus connection between monitor and scoreboard is done in env class
+
+In test class, we instantiate all the env, and seqr classes, and use phase.raise\_objection(this) and seq call like start method, and phase.drop\_objection(this) , and in tb top, we call this test to start the verification, run\_test("test") starts the verification.
+
+
+
+</details>
+
+<details>
+
+<summary>Isolate rightmost 1 bit in a word</summary>
+
+```verilog
+word_out = (word_in) & (-word_in);
+```
+
+</details>
+
+<details>
+
+<summary>All datatypes initialization</summary>
+
+```verilog
+//unpacked arrays
+bit [5:0] unpacked [2:0]; //creates unpacked[0], unpacked[1] .. of 6 bit lenght
+//foreach for multidimensional array is like this
+foreach(unpacked[i,j]){ }
+//packed array
+bit [2:0] [5:0] a; //creates 3 a packed in 6
+```
+
+</details>
+
+<details>
+
+<summary>Why we should use non-blocking assignments in driver and blocking assignments in monitor?</summary>
+
+Nonblocking assignments in the driver help avoid race conditions in the underlying DUT. They allow the driver to change signal values “just after the clock” such as
+
+```verilog
+
+task run_phase( uvm_phase phase );
+  int top_idx = 0;
+  
+  // Default conditions:
+  ADPCM.frame <= 0;
+  ADPCM.data <= 0;
+  forever begin
+    @(posedge ADPCM.clk);
+     ADPCM.frame <= 1; // Start of frame
+    for(int i = 0; i < 8; i++) begin // Send nibbles
+      @(posedge ADPCM.clk);
+      ADPCM.data <= req.data[3:0];
+      req.data = req.data >> 4;
+    end
+  
+    ADPCM.frame <= 0; // End of frame
+    seq_item_port.item_done(); // Indicates that the sequence_item has been consumed
+  end
+endtask: run
+```
+
+This allows the driver to interact with the DUT as if it were a “normal” SystemVerilog module. For monitors, on the other hand, we use blocking assignments because there is no worry about race conditions, since monitors typically sample values on the clock edge and then just do stuff with them:
+
+```verilog
+
+task run_phase( uvm_phase phase );
+    wb_txn txn, txn_clone;
+    txn = wb_txn::type_id::create("txn");  // Create once and reuse
+    forever @ (posedge m_v_wb_bus_if.clk)
+      if(m_v_wb_bus_if.s_cyc) begin // Is there a valid wb cycle?
+        txn.adr = m_v_wb_bus_if.s_addr; // get address
+        txn.count = 1;  // set count to one read or write
+  ...//You get the idea
+```
+
+</details>
+
+<details>
+
+<summary>Reversing digits of number</summary>
+
+```cpp
+function rev();
+int reverse = 0;
+if(number > 0)
+reverse = reverse* 10 + (number%10);
+number = number / 10;
+
+//so in this way we can find can reverse, so the loop continues until 
+//number becomes 0
+```
+
+</details>
+
+<details>
+
+<summary>Static casting vs Dynamic casting</summary>
+
+Static casting is unrelated to oops in sv, since sv doesnt have pointers, the only use static casting is to change the interpretation of value from one type to other type. It has the ability to preserve each bit while casting(chaning the shape of array or struct from one type to other).\
+\
+Dynamic casting is used to safely cast the child class handle to parent class handle. means parent class = child class; //this is valid no error is seen, but below assignment shows error, child class = parent class; //this is not valid no we will do this instead
+
+child class c1();
+
+parent class = child class;
+
+$cast(c1, parent class); //this is valid
+
+</details>
+
+
+
+
+
+
+
+
+
+
 
