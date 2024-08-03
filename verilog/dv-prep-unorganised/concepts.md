@@ -104,6 +104,10 @@ Computer architecture related questions. (covered all basic stuff from pipeline,
 
 <summary><mark style="color:red;">Pipeline Hazards :</mark> </summary>
 
+
+
+Pipelining is a technique used to increase instruction throughput by overlapping the execution of multiple instructions.\
+\
 Imagine you're designing a 5-stage pipeline for a RISC processor. You notice that for certain instruction sequences, the pipeline stalls frequently. Can you explain what might be causing this, and propose a solution?
 
 Frequent stalls in certain instruction sequences might be because of data dependencies between instructions.&#x20;
@@ -581,7 +585,585 @@ $cast(c1, parent class); //this is valid
 
 </details>
 
+<details>
 
+<summary>ALU verification plan and coverage bins</summary>
+
+```
+mindmap
+[ALU Verification Plan]
+│
+├─ Functional Verification
+│  ├─ Operation Testing
+│  │  ├─ Arithmetic operations (ADD, SUB, MUL, DIV)
+│  │  ├─ Logical operations (AND, OR, XOR, NOT)
+│  │  └─ Shift operations (Left shift, Right shift)
+│  │
+│  ├─ Input Combinations
+│  │  ├─ All possible opcode combinations
+│  │  ├─ Various data input ranges
+│  │  └─ Special cases (e.g., divide by zero)
+│  │
+│  └─ Flag Testing
+│     ├─ Zero flag
+│     ├─ Carry/Borrow flag
+│     ├─ Overflow flag
+│     └─ Sign flag
+│
+├─ Edge Case Testing
+│  ├─ Boundary value analysis
+│  ├─ Corner cases for each operation
+│  └─ Invalid input handling
+│
+├─ Performance Verification
+│  ├─ Timing analysis(We'll verify that the ALU meets the required clock frequency and latency specifications.)
+│  ├─ Power consumption(We'll measure and verify that power usage is within acceptable limits.)
+│  └─ Area utilization(We'll ensure the ALU fits within the allocated chip area)
+│
+├─ Verification Environment
+│  ├─ Testbench architecture
+│  ├─ Stimulus generation
+│  └─ Response checking
+│
+└─ Verification Metrics
+   ├─ Code coverage
+   ├─ Functional coverage
+   └─ Assertion coverage
+   
+
+coverage bins help us create seperate bins for each value in the given range of 
+possible values of coverage point variable.
+
+```
+
+</details>
+
+<details>
+
+<summary>Can you explain the MESI protocol, particularly the O and F states?</summary>
+
+MESI protocol Modified, Exclusive, Shared and Invalid is a cache coherency protocol used in mulitprocessor systems to maintain consistency of data among multiple cache. So we extend the current MESI with two more states, O means Owned and F means Forward state.  Now we will discuss about all the states, \
+Modified(M) : Cache line is present only in current cache and is dirty(different from MainMem),&#x20;
+
+Exclusive(E) : Cache line is present only in current cache and is clean
+
+Shared (S) : Cache line maybe present in other caches and is clean
+
+Invalid (I) : Cache line is not present in cache
+
+Owned (O) : O is similar to S state, Cache line is potentially shared but is dirty, Only one cache hold the line in O state, rest all hold in S state, and cache with O state is responsible of writing back the data to main mem when line is evicted. This state can benefits like, It allows modified cache line to be shared without immediately writing back the data to MM, and other caches can read the most up to date data directly from cache, rather than MM.&#x20;
+
+Forward (F) : Cache should forward data to other cache based on read request, Used in systems with distributed directories to optimize snoop filtering. Suppose in systems with many processors this reduces the number of caches needs to be snooped on read request.&#x20;
+
+In practice, the O state is more commonly implemented than the F state. The O state is particularly useful in systems where data sharing is frequent but writes are less common, as it allows for efficient sharing of modified data without immediate write-backs. The F state, while less common, can be very beneficial in large-scale systems where reducing snoop traffic is crucial for performance and scalability.
+
+</details>
+
+<details>
+
+<summary>You're tasked with verifying an asynchronous FIFO. Can you walk me through your verification plan, highlighting the key challenges and how you'd address them</summary>
+
+I would start with verifying the Cross Domain Crossing Checks:  For example the gray code counters are correctly implemented for the read and write pointers. and Full and empty flags verification, like filling the fifo fast enough and checking whether the full flag is asserted or not at the right time. Check whether data written into fifo is read out in correct order without corruption.  let's consider a scenario where we're testing the full flag behavior:
+
+1. We start with an empty FIFO.
+2. We write data at the maximum possible rate on the write clock domain.
+3. We read data at a slower rate on the read clock domain.
+4. We monitor the full flag, ensuring it asserts exactly when the FIFO reaches its maximum capacity.
+5. We continue writing and reading, verifying that no data is lost and the full flag remains asserted as long as the FIFO is full. This approach allows us to verify not just the functionality, but also the timing aspects of the full flag across clock domains.
+
+```
+[Asynchronous FIFO Verification]
+|
+|-- Clock Domain Crossing (CDC)
+|   |-- Gray code counters
+|   |-- Metastability checks
+|
+|-- Flag Verification
+|   |-- Full flag
+|   |-- Empty flag
+|
+|-- Data Integrity
+|   |-- Write/Read patterns
+|   |-- Order preservation
+|
+|-- Corner Cases
+|   |-- Almost full/empty
+|   |-- Simultaneous R/W
+|
+|-- Performance
+    |-- Throughput
+    |-- Different traffic patterns
+```
+
+
+
+</details>
+
+<details>
+
+<summary>Randc vs rand</summary>
+
+Rand : generates purely random values without any limitations on repetitions.
+
+Randc : also generates purely random values without repetitions unless all the values are seen or generated atleast once, then it repeats the values. Suppose we have to test a port variable, using rand bit \[2:0] port; when we use rand, we might see it generates some port number from 8 ports more frequently thus missing some ports, but when we use randc, then it generates all the 8 ports atleast once before repeating the ports.&#x20;
+
+</details>
+
+<details>
+
+<summary>Can you explain register renaming and register forwarding in the context of processor design? How do these techniques improve performance?</summary>
+
+Register renaming and register forwarding are crucial techniques in modern processor design that help improve performance by addressing data hazards and enabling more efficient instruction-level parallelism.
+
+Register Renaming: This technique is used to eliminate false dependencies (WAR and WAW hazards) between instructions. It involves mapping architectural registers to a larger set of physical registers. Here's a scenario to illustrate:
+
+Consider the following code:
+
+```
+CopyADD R1, R2, R3  // R1 = R2 + R3
+SUB R4, R1, R5  // R4 = R1 - R5
+MUL R1, R6, R7  // R1 = R6 * R7
+DIV R8, R1, R9  // R8 = R1 / R9
+```
+
+Without register renaming:
+
+* The MUL instruction must wait for the SUB to complete due to the WAW hazard on R1.
+* The DIV instruction must wait for the MUL to complete to get the correct value of R1.
+
+With register renaming:
+
+1.  The processor might map these operations to physical registers:
+
+    ```
+    CopyADD P1, P2, P3  // P1 = P2 + P3 (R1 mapped to P1)
+    SUB P4, P1, P5  // P4 = P1 - P5 (R4 mapped to P4)
+    MUL P6, P7, P8  // P6 = P7 * P8 (R1 mapped to P6)
+    DIV P9, P6, P10 // P9 = P6 / P10 (R8 mapped to P9)
+    ```
+2. Now, the MUL can execute in parallel with ADD and SUB, as it's writing to a different physical register.
+3. The DIV correctly uses the result from MUL (P6) instead of the earlier value of R1 (P1).
+
+This technique allows for more instructions to be executed in parallel, significantly improving performance.
+
+Register Forwarding: This technique, also known as data forwarding, is used to reduce the impact of data dependencies (RAW hazards) by directly passing results between pipeline stages without waiting for them to be written back to the register file.
+
+Scenario: Consider a simple 5-stage pipeline (Fetch, Decode, Execute, Memory, Writeback) and the following code:
+
+```
+CopyADD R1, R2, R3
+SUB R4, R1, R5
+```
+
+Without forwarding:
+
+1. The ADD instruction computes the result in the Execute stage.
+2. The SUB instruction, needing R1, would have to stall for two cycles (Memory and Writeback of ADD) before it can proceed to its Execute stage.
+
+With forwarding:
+
+1. As soon as the ADD instruction computes the result in the Execute stage, it's immediately forwarded to the SUB instruction.
+2. The SUB instruction can now proceed to its Execute stage in the very next cycle, saving two cycles of pipeline stall.
+
+This technique significantly reduces pipeline stalls, improving overall processor performance.
+
+In modern processors, these techniques are often used together. Register renaming provides more opportunities for out-of-order execution, while register forwarding ensures that the most recent data is always available to dependent instructions, minimizing stalls and maximizing throughput."
+
+Mind Map for Register Renaming and Forwarding:
+
+```
+Copy[Register Optimization Techniques]
+|
+|-- Register Renaming
+|   |-- Eliminates false dependencies
+|   |-- Maps architectural to physical registers
+|   |-- Enables out-of-order execution
+|
+|-- Register Forwarding
+    |-- Reduces impact of true dependencies
+    |-- Passes results between pipeline stages
+    |-- Minimizes pipeline stalls
+```
+
+</details>
+
+<details>
+
+<summary>Timing path delays</summary>
+
+* Clock-to-Q delay: Time for a flip-flop to output data after clock edge.
+* Combinational logic delay: Propagation through gates and other logic elements.
+* Interconnect delay: Time for signals to traverse wires between logic elements.
+* Setup time: Required stable time before clock edge at the receiving flip-flop.
+* Clock skew: Difference in arrival times of clock at source and destination.
+* Jitter: Variations in clock period
+
+</details>
+
+<details>
+
+<summary>How to tackle negative slack issues</summary>
+
+Identify Critical paths : Use timing reports to pinpoint worst negative slack paths.Analyzed logic depth: Found paths with excessive logic levels.
+
+* Optimized RTL: Rewrote complex combinational logic to reduce depth.
+* Applied timing constraints: Tightened constraints on critical paths.
+* Used faster cells: Replaced slow cells with faster alternatives in the library.
+* Pipeline insertion: Added registers to break long paths where appropriate.
+* Clock skew optimization: Adjusted clock tree to balance arrival times.
+
+</details>
+
+<details>
+
+<summary>Explain why CDC (Clock Domain Crossing) checks are important in digital design.</summary>
+
+The importance of performing CDC analysis is to identify metastability issues due to missing synchronizers.
+
+1. Metastability prevention: Signals crossing clock domains can become metastable, leading to unpredictable behavior.
+2. Data coherency: Ensure multi-bit signals are sampled correctly across domains.
+3. Functional correctness: Prevent data loss or corruption due to timing violations.
+4. Reliability: Avoid system failures caused by CDC-related issues.
+5. Performance optimization: Identify and optimize critical CDC paths.
+
+Without proper CDC checks, designs can suffer from intermittent failures that are hard to debug and can compromise system integrity
+
+</details>
+
+<details>
+
+<summary>Why are synchronizers used</summary>
+
+Synchronizers are used for several critical reasons:
+
+1. Metastability resolution: They allow potentially metastable signals to settle.
+2. Clock domain bridging: Safely transfer data between different clock domains.
+3. Noise reduction: Filter out glitches or noise on asynchronous inputs.
+4. Timing closure: Help meet setup and hold times for cross-domain signals.
+5. Deterministic behavior: Ensure predictable operation in multi-clock systems.
+
+By using synchronizers, we significantly reduce the risk of system failures due to metastability or timing issues in cross-domain communications
+
+</details>
+
+<details>
+
+<summary>What does the arrival time in a synthesis timing report signify?</summary>
+
+Data arrival time is the time required for data to propagate through source flip flop, travel through combinational logic and routing and arrive at the destination flip-flop before the next clock edge occurs. Arrival Time= Tclk-q+Tcombo
+
+* The cumulative delay from the launch edge of the clock to the point where data arrives at the capture flip-flop.
+* It includes clock-to-Q delay of the source flip-flop, combinational logic delay, and interconnect delay.
+* Used in comparison with required time to calculate slack.
+* A larger arrival time often indicates a longer or more complex path.
+* Critical for identifying timing violations and optimizing paths.
+
+</details>
+
+<details>
+
+<summary>What strategies would you employ to resolve negative slack in a design?</summary>
+
+Optimize critical paths : reduce logic levels, and use faster library cells.&#x20;
+
+Restructure RTL : break complex combinational logic
+
+
+
+</details>
+
+<details>
+
+<summary>Describe methods to synchronize data when sending it from one clock domain to another</summary>
+
+For synchronizing data across clock domains, we can use:
+
+1. Double Flop Synchronizer:
+   * For single-bit signals
+   * Two flip-flops in destination domain
+2. Gray Code Counter:
+   * For multi-bit counters
+   * Ensures only one bit changes at a time
+3. FIFO:
+   * For multi-bit data streams
+   * Separate read and write clocks
+4. Handshaking:
+   * For sporadic data transfers
+   * Uses request/acknowledge signals
+5. MUX-based Synchronizer:
+   * For mutually exclusive multi-bit buses
+6. Pausible Clocking:
+   * Temporarily pause one clock during transfer
+7. Synchronous Design:
+   * Use rationally related clocks where possible
+
+</details>
+
+<details>
+
+<summary>How would you approach synchronizing large signal data across clock domains?</summary>
+
+
+
+</details>
+
+<details>
+
+<summary>Explain the design of a handshake protocol using valid, acknowledge, and data bits</summary>
+
+* Signals:
+  * Valid: Asserted by sender when data is ready
+  * Acknowledge: Asserted by receiver when data is accepted
+  * Data: The actual data bits to be transferred
+* Protocol sequence: a. Sender puts data on bus, asserts Valid b. Receiver samples Valid, reads data c. Receiver asserts Acknowledge d. Sender deasserts Valid e. Receiver deasserts Acknowledge
+* Key design considerations:
+  * Use double-flop synchronizers for Valid and Acknowledge
+  * Ensure data stability when Valid is asserted
+  * Implement timeout mechanism for hung transactions
+  * Consider adding parity/ECC for data integrity
+* State machine implementation:
+  * Sender states: Idle, Data\_Valid, Wait\_Ack
+  * Receiver states: Idle, Data\_Received, Send\_
+
+</details>
+
+<details>
+
+<summary>Given a 2 bit arbiter, verification plan</summary>
+
+[https://reverent-northcutt-8163cd.netlify.app/blog/markdown-test2/](https://reverent-northcutt-8163cd.netlify.app/blog/markdown-test2/)
+
+</details>
+
+<details>
+
+<summary>Here's a diagram of a 4-bit Linear Feedback Shift Register (LFSR). Can you implement this in Verilog?</summary>
+
+```verilog
+module lsfr(
+input logic clk,
+input logic rst,
+output reg [3:0] out );
+
+always @(posedge clk) begin
+if(rst) begin
+    out <= 4'b1111;
+end else begin
+    out <= {out[2:0], out[3] ^ out[2]};
+end
+
+end
+// so when we are lsfr, we xor, with 1111, after 14 steps we again see 1111 pattern
+
+```
+
+</details>
+
+<details>
+
+<summary>What are the main types of hazards in pipelined processors?</summary>
+
+1. Data Hazards:
+   * Occur when an instruction depends on the result of a previous instruction still in the pipeline
+   * Types: RAW (Read After Write), WAR (Write After Read), WAW (Write After Write)
+   * Solutions: Forwarding, stalling, register renaming
+2. Control Hazards:
+   * Occur due to branch instructions and changes in program flow
+   * Impact: Pipeline flush if branch prediction is incorrect
+   * Solutions: Branch prediction, delayed branching
+3. Structural Hazards:
+   * Occur when two instructions need the same hardware resource simultaneously
+   * Example: Single memory for both instruction fetch and data access
+   * Solutions: Resource duplication, pipeline stalling
+
+Addressing these hazards is crucial for effective pipelining and maintaining instruction throughp
+
+</details>
+
+<details>
+
+<summary>why active low reset is preferred, and also about active high reset and their codes</summary>
+
+**Active High Reset**: This means that the reset signal is asserted (or active) when it is at a high voltage level (usually logic 1, which is typically around 3.3V or 5V in digital circuits). When the reset signal is high, it indicates that the system should be reset or initialized.
+
+**Active Low Reset**: Conversely, an active low reset means that the reset signal is asserted when it is at a low voltage level (usually logic 0, which is near 0V in digital circuits). When the reset signal is low, it indicates that the system should be reset or initialized.
+
+best practice nowadays is to to match the polarity of the standard cell library. Standard cells often have an active low reset signal, so you should match that. For example, if a std cell has an active low reset and you write your RTL to have an active high reset, the synthesis tool will have to infer an additional inverter somewhere along that path.\
+
+
+for active low reset it would be like this -> @(posedge clk or negedge reset)
+
+for active high reset it would be like this -> @(posedge clk or posedge reset)
+
+and why reset is active low is preferred
+
+* Noise immunity:
+  * Less susceptible to noise-induced resets
+  * High voltage noise more common than low voltage noise
+* Power-on behavior:
+  * Ensures reset during power-up when voltages are rising
+  * Prevents unwanted state changes during power fluctuations
+* Open-drain compatibility:
+  * Multiple reset sources can be easily combined (wired-OR)
+  * Simplifies system-level reset design
+* Legacy compatibility:
+  * Many older ICs use active low reset
+  * Maintains consistency in mixed old/new designs
+* Pull-up resistor usage:
+  * Can be combined with a pull-up for default reset state
+  * Useful in systems with optional reset connections
+* Lower power consumption:
+  * In CMOS, driving a signal low typically consumes less power
+
+
+
+</details>
+
+<details>
+
+<summary>Write through vs Write back cache. For which of these is cache coherency protocol needed?</summary>
+
+Write-through and write-back are two cache writing policies:
+
+Write-through:
+
+* Writes data to both cache and main memory simultaneously
+* Ensures memory always has updated data
+* Higher memory bandwidth usage
+* Simpler to implement
+
+Write-back:
+
+* Writes data only to cache
+* Updates main memory when cache line is evicted
+* More efficient use of memory bandwidth
+* Requires dirty bit to track modified cache lines
+
+Cache coherency is needed for both, but it's more critical and complex for write-back caches. In write-back, other caches or processors may have outdated data until a cache line is written back to main memory. Write-through naturally maintains coherency with main memory but still needs protocols to maintain coherency between multiple caches in a multi-processor system.
+
+</details>
+
+<details>
+
+<summary>4bit ripple carry adder/subtractor</summary>
+
+* Basic structure:
+  * 4 full adders connected in series
+  * Carry out of each adder feeds into carry in of the next
+* For subtraction:
+  * Add a control signal (sub)
+  * XOR this with B inputs and carry-in
+  * When sub=0, performs addition
+  * When sub=1, performs subtraction (A - B = A + (-B) = A + \~B + 1)
+*   Key points:
+
+    * Simple design, easy to implement
+    * Delay increases linearly with bit width
+    * Not suitable for high-speed, wide arithmetic unit
+
+    [https://vlsiverify.com/verilog/verilog-codes/4-bit-adder-subtractor/](https://vlsiverify.com/verilog/verilog-codes/4-bit-adder-subtractor/)
+
+</details>
+
+<details>
+
+<summary>Control Hazards in detail</summary>
+
+
+
+</details>
+
+<details>
+
+<summary>Packages</summary>
+
+Use packages for shared declarations, instead of $unit. Packages serve as containers for shared definitions and declarations, preventing inadvertent spaghetti code. Packages also have their ownname space, which will notcollide with definitions in other packages. There can still be name collision problems if two packages are wildcard imported into the same name space. This can be prevented by using explicit package imports and/or explicit package references, instead of wildcard imports
+
+</details>
+
+<details>
+
+<summary>Transport and Inertial Delays</summary>
+
+![](<../.gitbook/assets/image (3).png>)
+
+1\.        nertial delay: Delay model that represents time it takes for signal to propagate through the gate, but with a minimum duration that must be met before the signal propagates.
+
+Transport delay: Delay model that represents time it takes for the signal to propagate through the gate.
+
+</details>
+
+<details>
+
+<summary>You have a block that has input clock of 50MHz and, one bit input called "X", the output is a clock of 100MHz that toggles if and only if x is asserted high, and the second output is called "Z", "Z" changes keeps changing when x is asserted high, its value doesn't matter, as long as it changes. output is valid after 600ns.</summary>
+
+```verilog
+//Below are the test cases I came up with
+// test case1 : Z should be stable when X is 0
+always@(posedge clk50Mhz) begin
+if(!X) 
+    assert($stable(Z) ) else $fatal("Z is changing when X is 0");
+end 
+
+//testcase2 : Z keeps changing when X is 1
+if(X) begin
+assert(!($stable(Z) ) else $fatal("Z is not changign when X is 1");
+
+
+```
+
+</details>
+
+<details>
+
+<summary>.⁠ ⁠you have to model how contacts behave in phone directory. you start with an empty list [] when a call is recieved, append into dict.</summary>
+
+```python
+contacts = []
+
+def recieve_call(new_call):
+    global contacts
+    
+    if new_call in contacts:
+        contacts.remove(new_call)
+    
+    contacts.insert(0, new_call)
+    
+    print("current Contact list", contacts)
+
+recieve_call("90920490")
+recieve_call("43948959")
+.
+.
+.
+.
+
+
+```
+
+</details>
+
+<details>
+
+<summary>Generate random values of X such that x can be from 1 to 10, but not 5</summary>
+
+```verilog
+rand x;
+
+constraint x_ran{
+    x inside {[1:10]} && x! = 5;
+    }
+    
+//FORK JOIN is used to run multiple threads simultaneously
+initial begin
+    fork //begin both tasks A and B concurrently
+        task A();
+        task B();
+    join //join waits for both the tasks to complete before continuing 
+end
+```
+
+</details>
 
 
 

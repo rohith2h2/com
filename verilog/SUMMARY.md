@@ -19,6 +19,7 @@
 * [Edge detector](rtl-problems/edge-detector.md)
 * [Highbit for 10 units](rtl-problems/highbit-for-10-units.md)
 * [Mux Synchronizer](rtl-problems/mux-synchronizer.md)
+* [LRU](rtl-problems/lru.md)
 * [DV Prep(Unorganised)](rtl-problems/dv-prep-unorganised.md)
 
 ***
@@ -32,3 +33,4 @@
 * [Constraints Questions:](dv-prep-unorganised/constraints-questions.md)
 * [UVM](dv-prep-unorganised/uvm.md)
 * [Interview Questions(unorganised)](dv-prep-unorganised/concepts.md)
+* [Gotchas!!!](dv-prep-unorganised/gotchas.md)
