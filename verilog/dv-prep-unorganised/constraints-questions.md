@@ -560,11 +560,172 @@ endprogram
 
 </details>
 
+<details>
+
+<summary>stream of random numbers are getting generated. how to write constraints to make sure most recent four numbers are unique.</summary>
+
+```verilog
+//version 1\
+class random_stream;
+  rand int q[$:3];  // Queue with max 4 elements
+  
+  constraint value_range {
+    q.size() inside {[1:4]}; // Ensure queue is never empty
+    foreach(q[i]) 
+      q[i] inside {[1:30]};
+  }
+  
+  constraint unique_elements {
+    unique {q};
+  }
+  
+  function void post_randomize();
+    if (q.size() == 4)
+      q.pop_front();
+  endfunction
+
+  function void display();
+    $display("Current queue: %p", q);
+  endfunction
+endclass
+
+module test;
+  random_stream rs;
+  
+  initial begin
+    rs = new();
+    repeat(10) begin
+      if (rs.randomize())
+        rs.display();
+      else
+        $display("Randomization failed");
+    end
+  end
+endmodule
 
 
+//version 2
+class random_stream;
+  rand int q[$:3];  // Queue with max 4 elements
+  
+  constraint value_range {
+    q.size() inside {[1:4]}; // Ensure queue is never empty
+    foreach(q[i]) 
+      q[i] inside {[1:30]};
+  }
+  
+  constraint unique_elements {
+    unique {q};
+  }
+  
+  function void post_randomize();
+    if (q.size() == 4)
+      q.pop_front();
+  endfunction
 
+  function void display();
+    $display("Current queue: %p", q);
+  endfunction
+endclass
 
+module test;
+  random_stream rs;
+  
+  initial begin
+    rs = new();
+    repeat(10) begin
+      if (rs.randomize())
+        rs.display();
+      else
+        $display("Randomization failed");
+    end
+  end
+endmodule
 
+```
+
+There are different versions of solving this problem, using unique and comparing x value with queue elements to ensure no element is repeated
+
+&#x20;
+
+</details>
+
+<details>
+
+<summary>Constraint memory between 1KB and 64 KB</summary>
+
+```verilog
+class mem;
+rand int mem_size;
+
+constraint con{
+    mem_size >= 1*1024;
+    mem_size <= 64*1024;
+    mem_size % 1024 == 0; //to have mem_size as multiple of 1024(1Kb)
+   }
+endclass
+
+```
+
+</details>
+
+<details>
+
+<summary>For a 8 bit variable if the past randomization resulted in an odd value, the next randomization should be even with 75% probability else be even with 25% probability. Write a constraint</summary>
+
+```verilog
+class ConditionalRandomizer;
+  rand bit [7:0] value;
+  bit last_value_odd;
+  rand bit prob_selector;
+
+  // Constraint to implement the conditional probability
+  constraint value_constraint {
+    if (last_value_odd) {
+      // If last value was odd
+      prob_selector dist { 1 := 75, 0 := 25 };
+      if (prob_selector) {
+        value % 2 == 0; // 75% chance of even
+      } else {
+        value % 2 == 1; // 25% chance of odd
+      }
+    } else {
+      // If last value was even
+      prob_selector dist { 1 := 25, 0 := 75 };
+      if (prob_selector) {
+        value % 2 == 1; // 25% chance of odd
+      } else {
+        value % 2 == 0; // 75% chance of even
+      }
+    }
+  }
+
+  function void post_randomize();
+    last_value_odd = (value % 2 == 1);
+  endfunction
+
+  function void display();
+    $display("Generated value: %d (%s)", value, value % 2 ? "Odd" : "Even");
+  endfunction
+endclass
+
+module test;
+  ConditionalRandomizer cr;
+  
+  initial begin
+    cr = new();
+    repeat(20) begin
+      if (cr.randomize()) begin
+        cr.display();
+      end else begin
+        $display("Randomization failed");
+      end
+    end
+  end
+endmodule
+```
+
+</details>
 
 
 

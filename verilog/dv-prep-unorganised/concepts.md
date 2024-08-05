@@ -1116,7 +1116,7 @@ assert(!($stable(Z) ) else $fatal("Z is not changign when X is 1");
 
 <details>
 
-<summary>.⁠ ⁠you have to model how contacts behave in phone directory. you start with an empty list [] when a call is recieved, append into dict.</summary>
+<summary>.⁠ ⁠you have to model how contacts behave in phone directory. you start with an empty list [] when a call is received, append into dict.</summary>
 
 ```python
 contacts = []
@@ -1164,6 +1164,74 @@ end
 ```
 
 </details>
+
+<details>
+
+<summary>How to handle Interrupt in UVM?</summary>
+
+
+
+</details>
+
+<details>
+
+<summary>Why do we need associative array in sv and what are scalar and vector</summary>
+
+In dynamic array, we allocate memory before we use the array using new\[] , In associative array, we can allocate memory when we are uing the array. A dynamic array can be of a specific data type, and associative array can be of any data type. we can mix different data types and also classes.&#x20;
+
+Data object which doesnt have specific range for logic, bit, reg is scalar.
+
+data object which has specific range is vector.&#x20;
+
+</details>
+
+<details>
+
+<summary>Singleton class</summary>
+
+singleton classs ensures only one instance of class is created as provides global point of access to it.&#x20;
+
+<pre class="language-verilog"><code class="lang-verilog">class singleton;
+
+static local singleton sig;
+
+static function singleton get();
+<strong>    if(sig == null)
+</strong>        sig = new();
+    return sig;
+endfunction
+endclass
+
+//this can be called from anywhere using this
+singleton s1 = singleton::get();
+
+    
+    
+</code></pre>
+
+</details>
+
+<details>
+
+<summary>UVM objection, if you don't raise what happens</summary>
+
+UVM objections are used to control the runtime of the simulation. They are crucial for determining when to end the test phase and, consequently, the entire simulation. If you dont raise objections, simulation will end immediately after build and connect phase.
+
+
+
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
