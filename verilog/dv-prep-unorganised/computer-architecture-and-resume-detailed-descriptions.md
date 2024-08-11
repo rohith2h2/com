@@ -124,7 +124,43 @@ Block size : means more adjacent words will be fetched on each miss, and improve
 
 Associativity: Higher associativity reduces conflict misses but increases lookup complexity. &#x20;
 
+<details>
 
+<summary>Scoreboard - Dynamic Algorithm</summary>
+
+Scoreboard is data structure that provides informations necessary for all pieces of hardware to work together.  Scoreboarding a book keeping technique divides ID stages into two parts, decode and Read operands stages. Scoreboarding doesnt do register renaming, and OOO execution causes WAR and WAW hazards in pipeline. \
+solution for WAR - Stall Write back stage until registers have been read. Solution for WAW - Detect hazard and stall pipeline issue of new instruction until other instructions are completed. **Scoreboard keeps track of dependencies between instructions that have already issued.**&#x20;
+
+&#x20;
+
+</details>
+
+<details>
+
+<summary>Tomasulo  - Another Dynamic Algorithm</summary>
+
+This avoid WAR and WAW hazards, Using register renaming and reservation stations. FU buffers called “reservation stations”, have pending operands. Registers in instructions are replaced by values or pointers to reservation stations.&#x20;
+
+hardware dynamic scheduling algorithm designed to allow out-of-order execution of instructions while efficiently managing data hazards.
+
+![](<../.gitbook/assets/Screenshot 2024-08-10 at 3.23.36 PM.png>)
+
+
+
+</details>
+
+<details>
+
+<summary>Techniques to exploit ILP</summary>
+
+* Pipelining: Overlaps execution stages of multiple instructions
+* Superscalar execution: Issues multiple instructions per cycle
+* Out-of-order execution: Executes instructions as soon as their operands are ready
+* Speculative execution: Predicts branch outcomes and executes instructions speculatively
+
+
+
+</details>
 
 
 

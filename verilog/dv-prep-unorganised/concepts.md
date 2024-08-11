@@ -1221,13 +1221,143 @@ UVM objections are used to control the runtime of the simulation. They are cruci
 
 </details>
 
+<details>
+
+<summary>write a checker such that given 2 bit command cant be equal to 2 more than 4 times within 60 clock cycles.</summary>
+
+This uses intersect operator, which is confusing to me at this point, check vlsiverify
+
+[https://verificationacademy.com/forums/t/write-an-assertion-such-that-a-given-2-bit-command-cant-be-equal-to-2-more-than-4-times-within-60-clock-cycles/47477/5](https://verificationacademy.com/forums/t/write-an-assertion-such-that-a-given-2-bit-command-cant-be-equal-to-2-more-than-4-times-within-60-clock-cycles/47477/5)
+
+```verilog
+// Some code
+assert property(@(posedge clk)  ( (cmd[1:0] == 2'b10)[=1:4] or (cmd[1:0] != 2'b10)[*60] ) intersect 1 [*60]);
+
+//this assertion is consfusing
+```
+
+</details>
+
+<details>
+
+<summary>How sequence is started</summary>
+
+A sequence is started by calling start method that accepts a pointer to sequencer through which seq\_item are sent to driver, This pointer is called m\_sequencer, And this start methods assigns sequencer pointer to m\_sequence which calls body task in sequence. A body task is operation the sequence is intended to do in declared in body().
 
 
 
+</details>
+
+<details>
+
+<summary>A black box has 4 inputs (a,b,c,d) and a single output (out). We need to write an assertion to make sure when output (out) is asserted, a and b and c and d should have asserted (in any order) in the last 4 cycles.</summary>
+
+```verilog
+//for this assertions its a bit complex, we use shift registers to 
+//track the bits asserted
+
+always_ff @(posedge clk) begin
+    if(a || b || c || d) begin
+        was_abcd <= {1'b1, was_abcd[3:1]};
+    end else begin
+        was_abcd <= {1'b0, was_abcd[3:1]};
+    end
+end
+
+valid_req:
+assert property ( @(posedge clk)
+    $rose(out) |-> (was_abcd = 1) $display("assertion passed");
+endproperty
 
 
+```
 
+</details>
 
+<details>
+
+<summary><img src="../.gitbook/assets/image (4).png" alt="" data-size="original"></summary>
+
+&#x20;
+
+```verilog
+// Some code
+// Code your testbench here
+// or browse Examples
+
+function automatic bit check1(logic [15:0] x);
+  // Count num 1's seen
+  int seen1 = 0;
+
+  foreach(x[i]) begin
+    //$display("seen1: %d\t x[i]: %b", seen1, x[i]);
+    if(seen1 == 1 && x[i] == 0) begin
+      return 0;
+    end
+    if(x[i] == 1) begin
+      seen1 += 1;
+    end
+    else begin
+      seen1 = 0;
+    end
+  end
+  if(x[1:0] == 2'b01) begin
+    return 0;
+  end
+  return 1;
+endfunction
+    
+program test;
+  logic [15:0] data;
+  bit clk;
+  
+  property check1_data;
+    @(posedge clk) '1 |-> check1(data);
+  endproperty
+  
+  assert property(check1_data) begin
+    $display("%b passed", data);
+  end
+    else begin
+      $display("%b failed", data);
+    end
+  
+  initial begin
+    clk = 1'b0; #0.2;
+    forever #0.5 clk = ~clk;
+  end
+    
+  initial begin;
+	data = 0;
+    #1;
+    data = 16'b1011110001110010;
+    #1;
+    data = 16'b111111111111;
+    #1;
+    data = 16'b000000000000;
+    #1;
+    data = 16'b101010101010;
+    #1;
+    data = 16'b000011110000;
+    #1;
+    data = 16'b111110000000;
+    #1;
+    data = 16'b000000111111;
+    #1;
+    data = 16'b100000000000;
+    #1;
+    data = 16'b000000000001;
+    #1;
+    repeat(10) begin
+      data = $urandom_range(0, 16'hFFFF);
+      #1;
+    end
+    $finish;
+  end
+endprogram
+```
+
+</details>
 
 
 
